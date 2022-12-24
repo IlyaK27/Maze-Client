@@ -8,7 +8,27 @@ import javax.swing.*;
 
 public class Client {
     private static JFrame window;
-    private static MyPanel gamePanel;
+    private JPanel cards;
+    //private static MyPanel gamePanel;
+
+    // The different screens.
+    private JPanel menuScreen;
+    private JPanel playScreen;
+    private JPanel createLobbyScreen;
+    private JPanel lobbyScreen;
+    private JPanel howToPlayScreen;
+    private JPanel gameScreen;
+    private JPanel gameOverScreen;
+    private JPanel pauseScreen;
+
+    public final static String MENU_PANEL = "main menu screen";
+    public final static String PLAY_PANEL = "play screen";
+    public final static String HOW_TO_PLAY_PANEL = "how to play screen";
+    public final static String CREATE_LOBBY_PANEL = "create lobby screen";
+    public final static String LOBBY_PANEL = "lobby screen";
+    public final static String GAME_PANEL = "game screen";
+    public final static String GAME_OVER_PANEL = "game over screen";
+    public final static String PAUSE_PANEL = "pause screen";
 
     private static Ball myBall;
     private String name;
@@ -65,49 +85,48 @@ public class Client {
     }
     //-------------------------------------------------
     private void setup() throws IOException{
-        window = new JFrame("Agar.io");
+        window = new JFrame("Dungeon Runner");
         window.setPreferredSize(new Dimension(Const.WIDTH, Const.HEIGHT));// adding because of window problems   
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(false);
         window.setSize(Const.WIDTH, Const.HEIGHT);
-        window.addMouseMotionListener(new MyMouseMotionListener());
-
-        gamePanel = new MyPanel();
-
-        window.add(gamePanel);
 
         clientSocket = new Socket(HOST, PORT);  
         output = new PrintWriter(clientSocket.getOutputStream());
         input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-        name = "";
-        titleLabel = new JLabel("AGARIO");
-        nameLabel = new JLabel("Enter your name: ");
-        nameField = new JTextField(name,10);
-        playButton = new JButton("PLAY");
-        playButton.addActionListener(new ButtonListener());
         server = new ServerHandler(this);
-        playing = false;
-        addGUI();
+
+         //Initialize the screens.
+         this.menuScreen = new MenuScreenPanel(Const.MENU_BACKGROUND);
+         this.playScreen = new PlayScreenPanel(Const.MENU_BACKGROUND);
+         this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
+         this.createLobbyScreen = new CreateLobbyScreenPanel(Const.MENU_BACKGROUND);
+         this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
+         this.gameScreen = new GameScreenPanel(null);
+         this.gameOverScreen = new GameOverScreenPanel(Const.MENU_BACKGROUND);
+         this.pauseScreen = new PauseScreenPanel(Const.MENU_BACKGROUND);
+ 
+         // Add the screens to the window manager.
+         cards.add(menuScreen, MENU_PANEL);
+         cards.add(playScreen, PLAY_PANEL);
+         cards.add(howToPlayScreen, HOW_TO_PLAY_PANEL);
+         cards.add(createLobbyScreen, CREATE_LOBBY_PANEL);
+         cards.add(lobbyScreen, LOBBY_PANEL);
+         cards.add(gameScreen, GAME_PANEL);
+         cards.add(gameOverScreen, GAME_OVER_PANEL);
+         cards.add(pauseScreen, PAUSE_PANEL);
+ 
+         window.add(cards);
+         window.setVisible(true);
+         window.setResizable(false);
+         window.pack();
+
         window.setVisible(true);
     }
     public void stop() throws Exception{ 
         input.close();
         output.close();
         clientSocket.close();
-    }
-    private void addGUI(){
-        nameField.setText(name);      
-        gamePanel.add(titleLabel);
-        gamePanel.add(nameLabel);
-        gamePanel.add(nameField);
-        gamePanel.add(playButton);
-    }
-    private void removeGUI(){
-        gamePanel.remove(titleLabel);
-        gamePanel.remove(nameLabel);
-        gamePanel.remove(nameField);
-        gamePanel.remove(playButton); 
     }
     private int calculateAngle(){
         int angle = (int)(Math.atan( (double)(mouseY - (double)Const.HEIGHT/2) / (mouseX - (double)Const.WIDTH/2)) * (180 / Math.PI));
@@ -158,7 +177,6 @@ public class Client {
                     else if(updateInfo[0].equals(Const.DIE)){
                         System.out.println("die");
                         playing = false;
-                        addGUI();
                     }
                     else if(updateInfo[0].equals(Const.JOIN)){
                         int id = Integer.parseInt(updateInfo[1]);
@@ -227,7 +245,6 @@ public class Client {
             color = new Color((int)(Math.random() * 255), (int)(Math.random() * 255), (int)(Math.random() * 255));
             output.println(Const.JOIN + " " + color.getRed() + " " + color.getGreen() + " " + color.getBlue() + " " + name); 
             output.flush();
-            removeGUI();
         }
     }
 }
