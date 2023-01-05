@@ -33,13 +33,16 @@
      protected boolean mouseInside = false;
      protected boolean stayHeld = false;
  
-     public Button(JFrame window, Color inColor, Color outColor, Color hoverColor, int centerX, int y, int radius) {
+     public Button(JFrame window, Color inColor, Color outColor, Color hoverColor, int centerX, int y, int width, int height, int radius) {
          this.window = window;
          this.inColor = inColor;
          this.outColor = outColor;
          this.hoverColor = hoverColor;
          this.centerX = centerX;
          this.y = y;
+         this.width = width;
+         this.height = height;
+         this.x = (this.centerX - (this.width / 2));
          this.radius = radius;
      }
  //---------------------------------------------------------------------------------------------------------
@@ -58,11 +61,6 @@
      }
      public int getRadiusVal(){
          return this.radius;
-     }
-     protected void setDimensions(int width, int height){
-         this.width = width;
-         this.height = height;
-         this.x = (this.centerX - (this.width / 2));
      }
      public boolean getStayHeld(){
          return this.stayHeld;

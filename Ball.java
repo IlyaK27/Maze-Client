@@ -16,8 +16,8 @@ public class Ball extends Circle{
         int drawX = (x - otherCircle.getX() - radius) + Const.WIDTH/2;
         int drawY = (y - otherCircle.getY() - radius) + Const.HEIGHT/2;
         super.draw(g, otherCircle, drawX, drawY);
-        g.setColor(Const.FONT_COLOR);
-        g.setFont(Const.BALL_FONT);
+        //g.setColor(Const.FONT_COLOR);
+        //g.setFont(Const.BALL_FONT);
         int stringWidth = (int)g.getFontMetrics().getStringBounds(this.name, g).getWidth();
         int stringHeight = (int)g.getFontMetrics().getStringBounds(this.name, g).getHeight();
         g.drawString(this.name, drawX + radius - stringWidth/2, drawY + stringHeight / 3 + radius);
