@@ -30,8 +30,6 @@ public class Client {
     public final static String MID_ROUND_PANEL = "mid round screen";
     public final static String GAME_OVER_PANEL = "game over screen";
 
-    private String name;
-
     private PrintWriter output;    
     private BufferedReader input;
     private static ServerHandler server;
@@ -81,8 +79,8 @@ public class Client {
 
          //Initialize the screens.
          this.menuScreen = new MenuPanel(Const.MENU_BACKGROUND);
-         this.lobbySelectScreen = new LobbySelectPanel(Const.MENU_BACKGROUND);
-         this.lobbyScreen = new LobbyPanel(Const.MENU_BACKGROUND);
+         this.lobbySelectScreen = new LobbySelectPanel(Const.WALL_BACKGROUND);
+         this.lobbyScreen = new LobbyPanel(Const.WALL_BACKGROUND);
          //this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
          //this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
          //this.gameScreen = new GameScreenPanel(null);
@@ -92,9 +90,9 @@ public class Client {
          // Add the screens to the window manager.
          cards.add(menuScreen, MENU_PANEL);
          cards.add(lobbySelectScreen, LOBBY_SELECT_PANEL);
+         cards.add(lobbyScreen, LOBBY_PANEL);
          //cards.add(howToPlayScreen, HOW_TO_PLAY_PANEL);
          /*cards.add(createLobbyScreen, CREATE_LOBBY_PANEL);
-         cards.add(lobbyScreen, LOBBY_PANEL);
          cards.add(gameScreen, GAME_PANEL);
          cards.add(gameOverScreen, GAME_OVER_PANEL);
          cards.add(pauseScreen, PAUSE_PANEL);*/
@@ -158,7 +156,16 @@ public class Client {
                         lobbySelectScreen.newLobbyBanner(lobbyName, lobbyCount, Const.LOBBY_BANNER_START_Y + lobbySelectScreen.lobbies().size() * 100);
                     }
                     else if(updateInfo[0].equals(Const.LOBBY_SELECT)){
+                        this.client.lobbySelectScreen.lobbies.clear();
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_SELECT_PANEL);
+                        swapper.swap();
+                    }
+                    else if(updateInfo[0].equals(Const.NAME)){
+                        Client.ServerWriter writer = new Client.ServerWriter(output);
+                        writer.print(Const.NAME + " " + this.client.lobbySelectScreen.name());
+                    }
+                    else if(updateInfo[0].equals(Const.JOINED)){
+                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
                         swapper.swap();
                     }
                     /* From lobby
@@ -198,6 +205,21 @@ public class Client {
         }
     }
 
+    public static class ServerWriter{
+        private PrintWriter output;
+        /*
+         * Constructs a ServerWriter object with the command to write to the server.
+         * @param output PrintWriter that is connected to the server
+         */
+        public ServerWriter(PrintWriter output) {
+            this.output = output;
+        }
+        public void print(String text){
+            output.println(text);
+            output.flush();
+        }
+    }
+
     public static class ScreenSwapper implements ActionListener {
         private String nextPanel;
         private JPanel cards;
@@ -234,14 +256,14 @@ public class Client {
         public MenuPanel(Image backgroundSprite) {
             super(backgroundSprite);
             Font buttonFont = Const.MENU_BUTTON_FONT;
-            Color fontColor = Color.WHITE;
+            Color fontColor = Const.LARGE_BUTTON_FONT_COLOR;
             // Initialize the buttons.
-            int playY = 260;
+            int playY = 300;
             Text playButtonText = new Text("Play", buttonFont, fontColor, Const.HALF_WIDTH, playY);
             this.playButton = new ServerButton(window, output, playButtonText, Const.LOBBIES_LIST, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, playY, Const.RADIUS);
             
-            int howToPlayY = 430;
+            int howToPlayY = 470;
             Text howToPlayButtonText = new Text("How To Play", buttonFont, fontColor, Const.HALF_WIDTH, howToPlayY);
             this.howToPlayButton = new TextButton(window, cards, HOW_TO_PLAY_PANEL, howToPlayButtonText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, howToPlayY, Const.RADIUS);
@@ -275,8 +297,10 @@ public class Client {
     }
 
     public class LobbySelectPanel extends ScreenPanel {
-        private TextButton newlobbyButton;
+        private ServerButton newlobbyButton;
         private TextButton backButton;
+        private TextButton nameField;
+        private String name;
         private ArrayList<LobbyBanner> lobbies;
         //private TextButton creditsButton;
 
@@ -284,13 +308,14 @@ public class Client {
             super(backgroundSprite);
             Font buttonFont = Const.SMALL_BUTTON_FONT;
             Color fontColor = Color.WHITE;
+            this.name = "Player";
             // Initialize the buttons.
             Text newlobbyText = new Text("New Lobby", buttonFont, fontColor, Const.CONTINUE_X, Const.GO_BACK_Y);
-            this.newlobbyButton = new TextButton(window, cards, LOBBY_SELECT_PANEL, newlobbyText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+            this.newlobbyButton = new ServerButton(window, output, newlobbyText, Const.NEW_LOBBY ,Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y, Const.RADIUS);
             
             Text backText = new Text("Go back", buttonFont, fontColor, Const.GO_BACK_X, Const.GO_BACK_Y);
-            this.backButton = new TextButton(window, cards, HOW_TO_PLAY_PANEL, backText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+            this.backButton = new TextButton(window, cards, MENU_PANEL, backText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y, Const.RADIUS);
             
             lobbies = new ArrayList<LobbyBanner>();
@@ -315,6 +340,9 @@ public class Client {
         public ArrayList<LobbyBanner> lobbies() {
             return this.lobbies;
         }
+        public String name(){
+            return this.name;
+        }
         public void newLobbyBanner(String name, String playerCount, int y) {
             LobbyBanner lobbyBanner = new LobbyBanner(name, playerCount, y);
             lobbies.add(lobbyBanner);
@@ -328,12 +356,15 @@ public class Client {
             private Text name;
             private Text playerCount;
             private ServerButton joinButton;
+            private int vertPos;
             LobbyBanner(String name, String playerCount, int y){
                 this.name = new Text(name, Const.SMALL_BUTTON_FONT, Const.SMALL_BUTTON_IN_COLOR, Const.LOBBY_NAME_X, y);
                 this.playerCount = new Text(playerCount, Const.SMALL_BUTTON_FONT, Const.SMALL_BUTTON_IN_COLOR, Const.LOBBY_COUNT_X, y);
+                this.vertPos = y;
             }
 
             public void draw(Graphics graphics){
+                graphics.drawRoundRect(Const.LOBBY_BANNER_X, vertPos, Const.LOBBY_BANNER_WIDTH, Const.LOBBY_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
                 name.draw(graphics);
                 playerCount.draw(graphics);
             }
@@ -351,7 +382,7 @@ public class Client {
             Color fontColor = Color.WHITE;
             // Initialize the buttons.
             int playY = 260;
-            Text playButtonText = new Text("Play", buttonFont, fontColor, Const.HALF_WIDTH, playY);
+            Text playButtonText = new Text("beee", buttonFont, fontColor, Const.HALF_WIDTH, playY);
             this.playButton = new TextButton(window, cards, LOBBY_SELECT_PANEL, playButtonText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, playY, Const.RADIUS);
             

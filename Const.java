@@ -32,13 +32,17 @@ public class Const{
     public static final int GO_BACK_X = 100;
     public static final int CONTINUE_X = 1100;
     public static final int GO_BACK_Y = 900;
+    public static final int LOBBY_BANNER_WIDTH = 300;
+    public static final int LOBBY_BANNER_HEIGHT = 150;
+    public static final int LOBBY_BANNER_X = HALF_WIDTH - LOBBY_BANNER_WIDTH/2;
     
     public static final Font MENU_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 95);
     public static final Font SMALL_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 20);
+    public static final Color LARGE_BUTTON_FONT_COLOR = new Color(153, 217, 234);
 
-    public static final Color LARGE_BUTTON_IN_COLOR = new Color(71, 56, 117);
-    public static final Color LARGE_BUTTON_BORDER_COLOR = new Color(142, 124, 195);
-    public static final Color LARGE_BUTTON_HOVER_COLOR = new Color(32, 18, 77);
+    public static final Color LARGE_BUTTON_IN_COLOR = new Color(122, 112, 143);
+    public static final Color LARGE_BUTTON_BORDER_COLOR = new Color(92, 114, 163);
+    public static final Color LARGE_BUTTON_HOVER_COLOR = new Color(113, 105, 150);
     public static final Color SMALL_BUTTON_IN_COLOR = new Color(153, 153, 153); // Grey
     public static final Color SMALL_BUTTON_HOVER_COLOR = new Color(102, 102, 102); // Dark Grey
 
@@ -49,6 +53,7 @@ public class Const{
     // Client to Server commands
     public static final String LOBBIES_LIST = "LOBBIES";
     public static final String NEW_LOBBY = "NEW";
+    public static final String NAME = "NAME"; 
     public static final String JOIN_LOBBY = "JOIN";
 
     // Client to Lobby commands
@@ -89,6 +94,8 @@ public class Const{
 
     // Images
     public static final Image MENU_BACKGROUND = loadImage("extra_files/images/MenuBackground.png");
+    public static final Image WALL_BACKGROUND = loadImage("extra_files/images/WallBackground.png");
+    public static final Image GAME_BACKGROUND = loadImage("extra_files/images/GameBackground.png");
 
     private static Image loadImage(String imageName){
         Image image = new Image(imageName);

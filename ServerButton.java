@@ -29,13 +29,8 @@ public class ServerButton extends TextButton {
         public void mouseClicked(MouseEvent event) {
             // If mouse clicks button switch to correct screen
             if (mouseInside) {
-                if (!(cards == null && panel == null)){
-                    output.println(command);
-                    System.out.println("heh");
-                }
-                else if (cards == null && panel == null){
-                    stayHeld = !stayHeld;
-                 }
+                Client.ServerWriter writer = new Client.ServerWriter(output);
+                writer.print(command);
             }
         }
         public void mousePressed(MouseEvent e) {  
