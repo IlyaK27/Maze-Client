@@ -38,6 +38,7 @@ public class Client {
     private final String HOST = "localhost";
     private final int PORT = 5001;
     protected static boolean playing;
+    private String lobbyName;
     
     private int mouseX;
     private int mouseY;
@@ -52,6 +53,7 @@ public class Client {
             } catch (Exception e) {}
             if (playing){
                 window.repaint();
+                System.out.println("wee");
             }   
         }
     }
@@ -80,6 +82,7 @@ public class Client {
          //Initialize the screens.
          this.menuScreen = new MenuPanel(Const.MENU_BACKGROUND);
          this.lobbySelectScreen = new LobbySelectPanel(Const.WALL_BACKGROUND);
+         this.abilitySelectScreen = new AbilitySelectPanel(Const.BLANK_BACKGROUND);
          this.lobbyScreen = new LobbyPanel(Const.WALL_BACKGROUND);
          //this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
          //this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
@@ -90,6 +93,7 @@ public class Client {
          // Add the screens to the window manager.
          cards.add(menuScreen, MENU_PANEL);
          cards.add(lobbySelectScreen, LOBBY_SELECT_PANEL);
+         cards.add(abilitySelectScreen, ABILITY_SELECT_PANEL);
          cards.add(lobbyScreen, LOBBY_PANEL);
          //cards.add(howToPlayScreen, HOW_TO_PLAY_PANEL);
          /*cards.add(createLobbyScreen, CREATE_LOBBY_PANEL);
@@ -101,7 +105,8 @@ public class Client {
          window.setVisible(true);
          window.setResizable(false);
          window.pack();
-
+        playing = false;
+        lobbyName = "";
         window.setVisible(true);
     }
     public void stop() throws Exception{ 
@@ -151,21 +156,29 @@ public class Client {
                     updateInfo = update.split(" ", 8);
                     // From server
                     if(updateInfo[0].equals(Const.LOBBY)){
-                        String lobbyName = updateInfo[1];
-                        String lobbyCount = updateInfo[2];
-                        lobbySelectScreen.newLobbyBanner(lobbyName, lobbyCount, Const.LOBBY_BANNER_START_Y + lobbySelectScreen.lobbies().size() * 100);
+                        String lobbyName = updateInfo[1] + " Lobby";
+                        String lobbyCount = "Players = " + updateInfo[2] + "/4";
+                        lobbySelectScreen.newLobbyBanner(lobbyName, lobbyCount, Const.LOBBY_BANNER_START_Y + lobbySelectScreen.lobbies().size() * Const.SPACE_BETWEEN_LOBBIES);      
                     }
                     else if(updateInfo[0].equals(Const.LOBBY_SELECT)){
-                        this.client.lobbySelectScreen.lobbies.clear();
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_SELECT_PANEL);
                         swapper.swap();
                     }
+                    else if(updateInfo[0].equals(Const.CLEAR_LOBBIES)){
+                        this.client.lobbySelectScreen.lobbies.clear();
+                    }
+
                     else if(updateInfo[0].equals(Const.NAME)){
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         writer.print(Const.NAME + " " + this.client.lobbySelectScreen.name());
                     }
                     else if(updateInfo[0].equals(Const.JOINED)){
-                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
+                        lobbyName = updateInfo[1];
+                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, ABILITY_SELECT_PANEL);
+                        swapper.swap();
+                    }
+                    else if(updateInfo[0].equals(Const.LEAVE)){ // This command is given after the player wants to leave a lobby
+                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
                         swapper.swap();
                     }
                     /* From lobby
@@ -300,24 +313,26 @@ public class Client {
         private ServerButton newlobbyButton;
         private TextButton backButton;
         private TextButton nameField;
-        private String name;
+        private Text playerName;
         private ArrayList<LobbyBanner> lobbies;
         //private TextButton creditsButton;
 
         public LobbySelectPanel(Image backgroundSprite) {
             super(backgroundSprite);
-            Font buttonFont = Const.SMALL_BUTTON_FONT;
-            Color fontColor = Color.WHITE;
-            this.name = "Player";
             // Initialize the buttons.
-            Text newlobbyText = new Text("New Lobby", buttonFont, fontColor, Const.CONTINUE_X, Const.GO_BACK_Y);
-            this.newlobbyButton = new ServerButton(window, output, newlobbyText, Const.NEW_LOBBY ,Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y, Const.RADIUS);
+            Text newlobbyText = new Text("New Lobby", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y);
+            this.newlobbyButton = new ServerButton(window, output, newlobbyText, Const.NEW_LOBBY ,Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.SMALL_BUTTON_HOVER_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y, Const.RADIUS);
             
-            Text backText = new Text("Go back", buttonFont, fontColor, Const.GO_BACK_X, Const.GO_BACK_Y);
-            this.backButton = new TextButton(window, cards, MENU_PANEL, backText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y, Const.RADIUS);
-            
+            Text backText = new Text("Go back", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y);
+            this.backButton = new TextButton(window, cards, MENU_PANEL, backText, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.SMALL_BUTTON_HOVER_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y, Const.RADIUS);
+
+            int nameY = 170;
+            this.playerName = new Text("Player", Const.TEXT_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, nameY);
+            Text nameFieldText = new Text("                     ", Const.TEXT_FONT, Color.WHITE, Const.HALF_WIDTH, nameY);
+            this.nameField = new TextButton(window, null, null, nameFieldText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, nameY, Const.RADIUS);
             lobbies = new ArrayList<LobbyBanner>();
             
             // Add the listeners for the screens.
@@ -325,6 +340,9 @@ public class Client {
             this.addMouseMotionListener(newlobbyButton.new InsideButtonMotionListener());
             this.addMouseListener(backButton.new BasicMouseListener());
             this.addMouseMotionListener(backButton.new InsideButtonMotionListener());
+            this.addMouseListener(nameField.new BasicMouseListener());
+            this.addMouseMotionListener(nameField.new InsideButtonMotionListener());
+            this.addKeyListener(new NameKeyListener());
 
             this.setFocusable(true);
             this.addComponentListener(this.FOCUS_WHEN_SHOWN);
@@ -333,6 +351,8 @@ public class Client {
             super.paintComponent(graphics);
             this.newlobbyButton.draw(graphics);
             this.backButton.draw(graphics);
+            this.nameField.draw(graphics);
+            this.playerName.draw(graphics);
             for (LobbyBanner lobbyBanner: lobbies) {
                 lobbyBanner.draw(graphics);
             }
@@ -341,10 +361,12 @@ public class Client {
             return this.lobbies;
         }
         public String name(){
-            return this.name;
+            return this.playerName.getText();
         }
-        public void newLobbyBanner(String name, String playerCount, int y) {
-            LobbyBanner lobbyBanner = new LobbyBanner(name, playerCount, y);
+        public void newLobbyBanner(String lobbyName, String playerCount, int y) {
+            LobbyBanner lobbyBanner = new LobbyBanner(lobbyName, playerCount, y, this.playerName.getText());
+            this.addMouseListener(lobbyBanner.joinButton().new BasicMouseListener());
+            this.addMouseMotionListener(lobbyBanner.joinButton().new InsideButtonMotionListener());
             lobbies.add(lobbyBanner);
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
@@ -356,19 +378,99 @@ public class Client {
             private Text name;
             private Text playerCount;
             private ServerButton joinButton;
-            private int vertPos;
-            LobbyBanner(String name, String playerCount, int y){
-                this.name = new Text(name, Const.SMALL_BUTTON_FONT, Const.SMALL_BUTTON_IN_COLOR, Const.LOBBY_NAME_X, y);
-                this.playerCount = new Text(playerCount, Const.SMALL_BUTTON_FONT, Const.SMALL_BUTTON_IN_COLOR, Const.LOBBY_COUNT_X, y);
-                this.vertPos = y;
+            private int y;
+            LobbyBanner(String name, String playerCount, int y, String playerName){
+                this.name = new Text(name, Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, 0, y);
+                this.name.setX(Const.LOBBY_INFO_X); // Setting x's after so that they always line up no matter how long the name is
+                this.playerCount = new Text(playerCount, Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, 0, y + Const.LOBBY_COUNT_Y_DIFFERENCE);
+                this.playerCount.setX(Const.LOBBY_INFO_X); // Setting x's after so that they always line up no matter how long the name is
+                this.y = y;
+                Text joinText = new Text("Join", Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.LOBBY_JOIN_X, y + Const.LOBBY_JOIN_Y_DIFFERENCE);
+                String command = Const.JOIN_LOBBY + " " + name + " " + playerName;
+                this.joinButton = new ServerButton(window, output, joinText, command, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                Const.SMALL_BUTTON_HOVER_COLOR, Const.LOBBY_JOIN_X, y + Const.LOBBY_JOIN_Y_DIFFERENCE, Const.RADIUS - 5);
             }
-
             public void draw(Graphics graphics){
-                graphics.drawRoundRect(Const.LOBBY_BANNER_X, vertPos, Const.LOBBY_BANNER_WIDTH, Const.LOBBY_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
+                graphics.setColor(Const.LARGE_BUTTON_IN_COLOR);
+                graphics.fillRoundRect(Const.LOBBY_BANNER_X, y, Const.LOBBY_BANNER_WIDTH, Const.LOBBY_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
+                graphics.setColor(Const.LARGE_BUTTON_BORDER_COLOR);
+                graphics.drawRoundRect(Const.LOBBY_BANNER_X, y, Const.LOBBY_BANNER_WIDTH, Const.LOBBY_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
                 name.draw(graphics);
                 playerCount.draw(graphics);
+                joinButton.draw(graphics);
+            }
+            public ServerButton joinButton(){
+                return this.joinButton;
             }
         }
+        public class NameKeyListener implements KeyListener {
+            public void keyPressed(KeyEvent event) {
+                int key = event.getKeyCode();
+                String newChar = Character.toString((char)key);
+                if (nameField.getStayHeld() == true){
+                    String name = (playerName.getText());
+                    if (name.length() <= Const.PLAYER_NAME_MAX_LENGTH && key != 8 && key != 32){ //8 is backspace, 32 is space, no spaces in name to not mess up networking
+                        playerName.setText(name + newChar);
+                    }
+                    else if (key == 8 && playerName.getText().length() > 0){
+                        playerName.setText(name.substring(0, (name.length() - 1)));
+                    }
+                    //playerName.setText(playerName);
+                }
+                window.repaint();
+            }
+            public void keyReleased(KeyEvent event) { }
+            public void keyTyped(KeyEvent event) { }
+        }
+    }
+
+    public class AbilitySelectPanel extends ScreenPanel {
+        private ServerButton continueButton;
+        private ServerButton backButton;
+        private Text titleText;
+        private Text abilitiesText;
+        private Text abilityBankText;
+        private Text descriptionText; 
+        //private TextButton creditsButton;
+
+        public AbilitySelectPanel(Image backgroundSprite) {
+            super(backgroundSprite);
+            // Initialize the buttons.
+            String abilitiesCommand = Const.SELECTED;
+            Text continueText = new Text("Continue", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y);
+            this.continueButton = new ServerButton(window, output, continueText, abilitiesCommand ,Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.SMALL_BUTTON_HOVER_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y, Const.RADIUS);
+            
+            Text backText = new Text("Go back", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y);
+            String backCommand = Const.LEAVE;
+            this.backButton = new ServerButton(window, output, backText, backCommand, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.SMALL_BUTTON_HOVER_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y, Const.RADIUS);
+            
+            titleText = new Text("Ability Select", Const.TEXT_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 120);
+            
+            // Add the listeners for the screens.
+            this.addMouseListener(backButton.new BasicMouseListener());
+            this.addMouseMotionListener(backButton.new InsideButtonMotionListener());
+            this.addMouseListener(continueButton.new BasicMouseListener());
+            this.addMouseMotionListener(continueButton.new InsideButtonMotionListener());
+            this.setFocusable(true);
+            this.addComponentListener(this.FOCUS_WHEN_SHOWN);
+        }
+        public void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            this.backButton.draw(graphics);
+            this.continueButton.draw(graphics);
+            graphics.drawLine(200, 225, 200, 850);
+            graphics.drawLine(0, 225, Const.WIDTH, 225);
+            graphics.drawLine(0, 850, Const.WIDTH, 850);
+            graphics.drawLine(850, 225, 850, 850);
+            titleText.draw(graphics);
+        }
+        public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
+            public void componentShown(ComponentEvent event){
+                requestFocusInWindow();
+            }
+        };
     }
 
     public class LobbyPanel extends ScreenPanel {

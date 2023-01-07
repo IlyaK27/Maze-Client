@@ -26,18 +26,23 @@ public class Const{
     public static final int BUTTON_HORIZONTAL_SPACE = 10;
     public static final int BUTTON_VERTICAL_SPACE = 5;
     public static final int RADIUS = 40;
-    public static final int LOBBY_NAME_X = 400;
-    public static final int LOBBY_COUNT_X = 600;
-    public static final int LOBBY_BANNER_START_Y = 300;
+    public static final int LOBBY_INFO_X = 365;
+    public static final int LOBBY_JOIN_X = 790;
+    public static final int LOBBY_BANNER_START_Y = 305;
+    public static final int LOBBY_COUNT_Y_DIFFERENCE = 50; // How much lower the height of the player count is compared to the lobby name
+    public static final int LOBBY_JOIN_Y_DIFFERENCE = 25; // How much lower the height of the player count is compared to the lobby name
+    public static final int SPACE_BETWEEN_LOBBIES = 125;
     public static final int GO_BACK_X = 100;
     public static final int CONTINUE_X = 1100;
     public static final int GO_BACK_Y = 900;
-    public static final int LOBBY_BANNER_WIDTH = 300;
-    public static final int LOBBY_BANNER_HEIGHT = 150;
+    public static final int LOBBY_BANNER_WIDTH = 500;
+    public static final int LOBBY_BANNER_HEIGHT = 100;
     public static final int LOBBY_BANNER_X = HALF_WIDTH - LOBBY_BANNER_WIDTH/2;
     
     public static final Font MENU_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 95);
+    public static final Font TEXT_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 60);
     public static final Font SMALL_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 20);
+    public static final Font LOBBY_BANNER_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 35);
     public static final Color LARGE_BUTTON_FONT_COLOR = new Color(153, 217, 234);
 
     public static final Color LARGE_BUTTON_IN_COLOR = new Color(122, 112, 143);
@@ -47,6 +52,7 @@ public class Const{
     public static final Color SMALL_BUTTON_HOVER_COLOR = new Color(102, 102, 102); // Dark Grey
 
     public static final int LOBBY_SIZE = 4;
+    public static final int PLAYER_NAME_MAX_LENGTH = 8;
 
     // Commands (See shared doc for more info)
     public static final String PING = "PING"; // Making sure client is still connected
@@ -69,6 +75,7 @@ public class Const{
     public static final String LEAVE = "LEAVE"; // Client left lobby
 
     // Server to Client commands
+    public static final String CLEAR_LOBBIES = "CLEAR"; // Client clears its list of lobbies
     public static final String LOBBY = "LOBBY"; // Server sends name and current player count of specified lobby 
     public static final String LOBBY_SELECT = "SELECT"; // Tells the client to switch to lobby select screen
     public static final String JOINED = "JOINED"; // Server tells client they have joined the lobby they tried to join
@@ -95,7 +102,7 @@ public class Const{
     // Images
     public static final Image MENU_BACKGROUND = loadImage("extra_files/images/MenuBackground.png");
     public static final Image WALL_BACKGROUND = loadImage("extra_files/images/WallBackground.png");
-    public static final Image GAME_BACKGROUND = loadImage("extra_files/images/GameBackground.png");
+    public static final Image BLANK_BACKGROUND = loadImage("extra_files/images/BlankBackground.png");
 
     private static Image loadImage(String imageName){
         Image image = new Image(imageName);

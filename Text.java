@@ -44,6 +44,9 @@
      public String getText(){
          return this.text;
      }
+     public void setX(int x){
+        this.x = x;
+    }
      public void setText(String newText){
          this.text = newText;
          this.width = this.getTextWidth(); 
