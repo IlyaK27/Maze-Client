@@ -34,19 +34,16 @@
       */
      public void draw(Graphics graphics) {
          // Draw the button body.
-         if (!mouseInside) {
-             graphics.setColor(this.inColor);
-         } else {
-             graphics.setColor(this.hoverColor);
-         }
-         if (stayHeld == true){
-             graphics.setColor(this.hoverColor);
-         }
+        if(mouseInside || stayHeld){
+            graphics.setColor(this.hoverColor);
+        }else{
+            graphics.setColor(this.inColor);
+        }
          graphics.fillRoundRect(this.getXVal(), this.getYVal(), this.getWidthVal(), this.getHeightVal(), 
                                 this.getRadiusVal(), this.getRadiusVal());
          
          // Draw the button border.
-         graphics.setColor(this.outColor);
+         graphics.setColor(this.borderColor);
          graphics.drawRoundRect(this.getXVal(), this.getYVal(), this.getWidthVal(), this.getHeightVal(), 
                                 this.getRadiusVal(), this.getRadiusVal());
          

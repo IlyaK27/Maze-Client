@@ -14,7 +14,7 @@ public class Client {
     // The different screens.
     private MenuPanel menuScreen;
     private LobbySelectPanel lobbySelectScreen;
-    private JPanel abilitySelectScreen;
+    private AbilitySelectPanel abilitySelectScreen;
     private JPanel lobbyScreen;
     private JPanel howToPlayScreen;
     private JPanel gameScreen;
@@ -82,7 +82,7 @@ public class Client {
          //Initialize the screens.
          this.menuScreen = new MenuPanel(Const.MENU_BACKGROUND);
          this.lobbySelectScreen = new LobbySelectPanel(Const.WALL_BACKGROUND);
-         this.abilitySelectScreen = new AbilitySelectPanel(Const.BLANK_BACKGROUND);
+         this.abilitySelectScreen = new AbilitySelectPanel(Const.ABILITY_SELECT_BACKGROUND);
          this.lobbyScreen = new LobbyPanel(Const.WALL_BACKGROUND);
          //this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
          //this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
@@ -151,7 +151,7 @@ public class Client {
                 try {
                     update = input.readLine();
                 } catch (Exception e) {}
-                if(update != "" || update != null){
+                if(update != "" && update != null){
                     System.out.println(update);
                     updateInfo = update.split(" ", 8);
                     // From server
@@ -177,9 +177,22 @@ public class Client {
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, ABILITY_SELECT_PANEL);
                         swapper.swap();
                     }
+                    // From lobby
                     else if(updateInfo[0].equals(Const.LEAVE)){ // This command is given after the player wants to leave a lobby
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
                         swapper.swap();
+                        abilitySelectScreen.resetButtons();
+                    }
+                    else if(updateInfo[0].equals(Const.MY_ABILITIES)){ // This command is given after the player wants to leave a lobby
+                        Client.ServerWriter writer = new Client.ServerWriter(output);
+                        writer.print(Const.MY_ABILITIES + " " + abilitySelectScreen.abilities());
+                    }
+                    else if(updateInfo[0].equals(Const.ABILITIES)){ // This command is given after the player wants to leave a lobby
+                        String playerName = updateInfo[1];
+                        if(playerName.equals(lobbySelectScreen.name())){ // This is done so that the player cant swap screens until they have chosen all of their abilities
+                            Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
+                            swapper.swap();
+                        }
                     }
                     /* From lobby
                     else if(updateInfo[0].equals(Const.JOIN)){
@@ -374,7 +387,7 @@ public class Client {
                 requestFocusInWindow();
             }
         };
-        public class LobbyBanner{
+        private class LobbyBanner{
             private Text name;
             private Text playerCount;
             private ServerButton joinButton;
@@ -427,32 +440,81 @@ public class Client {
     public class AbilitySelectPanel extends ScreenPanel {
         private ServerButton continueButton;
         private ServerButton backButton;
-        private Text titleText;
-        private Text abilitiesText;
-        private Text abilityBankText;
-        private Text descriptionText; 
-        //private TextButton creditsButton;
+        // Button, Ability name
+        private AbilityButton ability1Button;
+        private AbilityButton ability2Button;
+        private AbilityButton ultimateButton;
+        private int currentAbility;
+        private ArrayList<AbilityButton> abilityBank;
+        private ArrayList<AbilityButton> ultimateBank;
+        private AbilityButton[] selectedAbilities;
 
         public AbilitySelectPanel(Image backgroundSprite) {
             super(backgroundSprite);
             // Initialize the buttons.
-            String abilitiesCommand = Const.SELECTED;
             Text continueText = new Text("Continue", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y);
-            this.continueButton = new ServerButton(window, output, continueText, abilitiesCommand ,Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+            this.continueButton = new ServerButton(window, output, continueText, Const.SELECTED ,Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.SMALL_BUTTON_HOVER_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y, Const.RADIUS);
             
             Text backText = new Text("Go back", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y);
-            String backCommand = Const.LEAVE;
-            this.backButton = new ServerButton(window, output, backText, backCommand, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+            this.backButton = new ServerButton(window, output, backText, Const.LEAVE, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.SMALL_BUTTON_HOVER_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y, Const.RADIUS);
             
-            titleText = new Text("Ability Select", Const.TEXT_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 120);
-            
+            this.ability1Button = new AbilityButton(window, Const.BLANK_ABILITY_IMAGE, Const.LARGE_BUTTON_BORDER_COLOR, "", null, Const.SELECTED_ABILITY_CENTER_X, 320, true);
+            this.ability2Button = new AbilityButton(window, Const.BLANK_ABILITY_IMAGE, Const.LARGE_BUTTON_BORDER_COLOR, "", null, Const.SELECTED_ABILITY_CENTER_X, 505, true);
+            this.ultimateButton = new AbilityButton(window, Const.BLANK_ABILITY_IMAGE, Const.LARGE_BUTTON_BORDER_COLOR, "", null, Const.SELECTED_ABILITY_CENTER_X, 700, true);
+            this.currentAbility = -1;
+            this.abilityBank = new ArrayList<AbilityButton>();
+            selectedAbilities = new AbilityButton[3];
+            selectedAbilities[0] = ability1Button; selectedAbilities[1] = ability2Button; selectedAbilities[2] = ultimateButton;
+            int row = 0;
+            int column = 0;
+            for (String abilityName : Const.ABILITY_IMAGES.keySet()) {
+                if(column == Const.MAX_ABILITES_PER_ROW){
+                    column = 0;
+                    row++;
+                }
+                Image abilityImage = Const.ABILITY_IMAGES.get(abilityName);
+                Image abilityDescription = Const.ABILITY_DESCRIPTIONS.get(abilityName);
+                AbilityButton button = new AbilityButton(window, abilityImage, Const.LARGE_BUTTON_BORDER_COLOR, abilityName, abilityDescription, 
+                    Const.ABILITY_BANK_X + (column * Const.ABILITY_X_DIFFERENCE), Const.ABILITY_BANK_Y + (row * Const.ABILITY_Y_DIFFERENCE), false);
+                abilityBank.add(button);
+                this.addMouseListener(button.new BasicMouseListener());
+                this.addMouseMotionListener(button.new InsideButtonMotionListener());
+                column++;
+            }
+            ultimateBank = new ArrayList<AbilityButton>();
+            row = 0;
+            column = 0;
+            for (String ultimateName : Const.ULTIMATE_IMAGES.keySet()) {
+                if(column == Const.MAX_ABILITES_PER_ROW){
+                    column = 0;
+                    row++;
+                }
+                Image ultimateImage = Const.ULTIMATE_IMAGES.get(ultimateName);
+                Image ultimateDescription = Const.ULTIMATE_DESCRIPTIONS.get(ultimateName);
+                AbilityButton button = new AbilityButton(window, ultimateImage, Const.LARGE_BUTTON_BORDER_COLOR, ultimateName, ultimateDescription, 
+                    Const.ABILITY_BANK_X + (column * Const.ABILITY_X_DIFFERENCE), Const.ULTIMATE_BANK_Y + (row * Const.ABILITY_Y_DIFFERENCE), false);
+                ultimateBank.add(button);
+                this.addMouseListener(button.new BasicMouseListener());
+                this.addMouseMotionListener(button.new InsideButtonMotionListener());
+                column++;
+            }
             // Add the listeners for the screens.
+            this.addMouseListener(new SelectMouseListener());
+
             this.addMouseListener(backButton.new BasicMouseListener());
             this.addMouseMotionListener(backButton.new InsideButtonMotionListener());
             this.addMouseListener(continueButton.new BasicMouseListener());
             this.addMouseMotionListener(continueButton.new InsideButtonMotionListener());
+
+            this.addMouseListener(ability1Button.new BasicMouseListener());
+            this.addMouseMotionListener(ability1Button.new InsideButtonMotionListener());
+            this.addMouseListener(ability2Button.new BasicMouseListener());
+            this.addMouseMotionListener(ability2Button.new InsideButtonMotionListener());
+            this.addMouseListener(ultimateButton.new BasicMouseListener());
+            this.addMouseMotionListener(ultimateButton.new InsideButtonMotionListener());
+
             this.setFocusable(true);
             this.addComponentListener(this.FOCUS_WHEN_SHOWN);
         }
@@ -460,17 +522,165 @@ public class Client {
             super.paintComponent(graphics);
             this.backButton.draw(graphics);
             this.continueButton.draw(graphics);
-            graphics.drawLine(200, 225, 200, 850);
-            graphics.drawLine(0, 225, Const.WIDTH, 225);
-            graphics.drawLine(0, 850, Const.WIDTH, 850);
-            graphics.drawLine(850, 225, 850, 850);
-            titleText.draw(graphics);
+            this.ability1Button.draw(graphics);
+            this.ability2Button.draw(graphics);
+            this.ultimateButton.draw(graphics);
+            for (AbilityButton button : abilityBank) {
+                button.draw(graphics);
+            }
+            for (AbilityButton button : ultimateBank) {
+                button.draw(graphics);
+            }
+            if(currentAbility != -1 && selectedAbilities[currentAbility].getDescription() != null){selectedAbilities[currentAbility].getDescription().draw(graphics, 851, 273);}
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
             public void componentShown(ComponentEvent event){
                 requestFocusInWindow();
             }
         };
+        public String abilities(){
+            return this.ability1Button.getName() + " " + this.ability2Button.getName() + " " + this.ultimateButton.getName(); 
+        }
+        private void switchSelectedAbility(int x, int y){
+            boolean switched = false;
+            for(int i = 0; i < selectedAbilities.length && !(switched); i++){
+                if(selectedAbilities[i].contains(x,y) && currentAbility != i){
+                    if(i == 2){ // Selecting nothing or ability to selecting ultimate
+                        for (AbilityButton button : abilityBank) {
+                            button.setEnabled(false);
+                        }
+                        for (AbilityButton button : ultimateBank) {
+                            button.setEnabled(true);
+                        }
+                    } 
+                    else if(i != 2 && currentAbility == 2){ // From selecting ultimate to selecting normal ability
+                        for (AbilityButton button : abilityBank) {
+                            button.setEnabled(true);
+                        }
+                        for (AbilityButton button : ultimateBank) {
+                            button.setEnabled(false);
+                        }
+                    }
+                    else{ // From selecting anything to selecting abiity
+                        if(currentAbility == -1){ // From selecting nothing to ability
+                            for (AbilityButton button : abilityBank) {
+                                button.setEnabled(true);
+                            }
+                        }else{ // From selecting ability to selecting other abiity
+                            for (AbilityButton button : abilityBank) {
+                                button.resetStayHeld();
+                            } 
+                        }
+                    }
+                    if (currentAbility != - 1){selectedAbilities[currentAbility].resetStayHeld();}
+                    currentAbility = i;
+                    switched = true;
+                }else if(selectedAbilities[i].contains(x,y) && currentAbility == i){
+                    currentAbility = -1;
+                    if (i == 2){
+                        for (AbilityButton button : ultimateBank) {
+                            button.setEnabled(false);
+                        }
+                    }
+                    else{
+                        for (AbilityButton button : abilityBank) {
+                            button.setEnabled(false);
+                        }
+                    }
+                }
+            }
+        }
+        public void resetButtons(){ // To make sure if you hop inbetween lobbies mid ability selection old selections don't stay
+            for (AbilityButton button : abilityBank) {
+                button.setEnabled(false);
+            }
+            for (AbilityButton button : ultimateBank) {
+                button.setEnabled(false);
+            }
+            for(AbilityButton button : selectedAbilities){
+                button.setImage(Const.BLANK_ABILITY_IMAGE);
+                button.setName("");
+                button.setDescription(null);
+            }
+            if(currentAbility != -1){
+                selectedAbilities[currentAbility].resetStayHeld();
+                currentAbility = -1;
+            }
+        }
+        public class SelectMouseListener implements MouseListener {
+            public void mouseClicked(MouseEvent event) {
+                int mouseX = event.getX();
+                int mouseY = event.getY();
+                // If mouse was pressed within selected abilities box
+                if (Const.SELECTED_ABILITES_BOX.contains(mouseX,mouseY)) {
+                    switchSelectedAbility(mouseX, mouseY);
+                // If mouse was pressed within ability bank box
+                } else if (Const.ABILITY_BANK_BOX.contains(mouseX,mouseY)) {
+                    if(currentAbility == 0 || currentAbility == 1){
+                        boolean swapped = false;
+                        int otherAbility = 1 - currentAbility;
+                        boolean abilitiesSwitched = false;
+                        for (AbilityButton button : abilityBank) {
+                            if(button.contains(mouseX, mouseY) && !(selectedAbilities[currentAbility].getName().equals(button.getName()))){ // Swapping selections
+                                swapped = true;
+                                if(selectedAbilities[otherAbility].getName().equals(button.getName())){ // To prevent 2 abilities being the same swap the places of the abilities
+                                    selectedAbilities[otherAbility].setImage(selectedAbilities[currentAbility].getImage());
+                                    selectedAbilities[otherAbility].setName(selectedAbilities[currentAbility].getName());
+                                    selectedAbilities[otherAbility].setDescription(selectedAbilities[currentAbility].getDescription());
+                                    abilitiesSwitched = true;
+                                }
+                                selectedAbilities[currentAbility].setImage(button.getImage());
+                                selectedAbilities[currentAbility].setName(button.getName());
+                                selectedAbilities[currentAbility].setDescription(button.getDescription());
+                                break;
+                            }
+                        }
+                        if (abilitiesSwitched){
+                            for (AbilityButton button : abilityBank) {
+                                if(selectedAbilities[otherAbility].getName().equals(button.getName())){ // Reseting all buttons except for last selected
+                                    button.resetStayHeld();
+                                    break;
+                                }
+                            }
+                        }
+                        else if (swapped){ // Unselecting the other ability
+                            for (AbilityButton button : abilityBank) {
+                                if(!(selectedAbilities[currentAbility].getName().equals(button.getName()))){ // Reseting all buttons except for last selected
+                                    button.resetStayHeld();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                // If mouse was pressed within ultimate bank box
+                } else if (Const.ULTIMATE_BANK_BOX.contains(mouseX,mouseY)) {
+                    if(currentAbility == 2){
+                        boolean swapped = false;
+                        for (AbilityButton button : ultimateBank) {
+                            if(button.contains(mouseX, mouseY) && !(ultimateButton.getName().equals(button.getName()))){ // Swapping selections
+                                swapped = true;
+                                ultimateButton.setImage(button.getImage());
+                                ultimateButton.setName(button.getName());
+                                ultimateButton.setDescription(button.getDescription());
+                                break;
+                            }
+                        }
+                        if (swapped){ // Unselecting the other ability
+                            for (AbilityButton button : abilityBank) {
+                                if(!(ultimateButton.getName().equals(button.getName()))){ // Swapping selections
+                                    button.resetStayHeld();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            public void mousePressed(MouseEvent event) { }
+            public void mouseReleased(MouseEvent event) { }
+            public void mouseEntered(MouseEvent event) { }
+            public void mouseExited(MouseEvent event) { }
+        }
     }
 
     public class LobbyPanel extends ScreenPanel {
@@ -494,9 +704,6 @@ public class Client {
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, howToPlayY, Const.RADIUS);
             
             
-            /*this.creditsButton = new TextButton(window, cards, CREDITS_PANEL, "Credits", buttonFont, fontColor, 
-                                         Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 770, Const.RADIUS);*/
             
             // Add the listeners for the screens.
             this.addMouseListener(playButton.new BasicMouseListener());
@@ -519,5 +726,34 @@ public class Client {
                 requestFocusInWindow();
             }
         };
+        public class PlayerBanner{
+            private Text name;
+            private Text playerCount;
+            private ServerButton joinButton;
+            private int y;
+            PlayerBanner(String name, String playerCount, int y, String playerName){
+                this.name = new Text(name, Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, 0, y);
+                this.name.setX(Const.LOBBY_INFO_X); // Setting x's after so that they always line up no matter how long the name is
+                this.playerCount = new Text(playerCount, Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, 0, y + Const.LOBBY_COUNT_Y_DIFFERENCE);
+                this.playerCount.setX(Const.LOBBY_INFO_X); // Setting x's after so that they always line up no matter how long the name is
+                this.y = y;
+                Text joinText = new Text("Join", Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.LOBBY_JOIN_X, y + Const.LOBBY_JOIN_Y_DIFFERENCE);
+                String command = Const.JOIN_LOBBY + " " + name + " " + playerName;
+                this.joinButton = new ServerButton(window, output, joinText, command, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                Const.SMALL_BUTTON_HOVER_COLOR, Const.LOBBY_JOIN_X, y + Const.LOBBY_JOIN_Y_DIFFERENCE, Const.RADIUS - 5);
+            }
+            public void draw(Graphics graphics){
+                graphics.setColor(Const.LARGE_BUTTON_IN_COLOR);
+                graphics.fillRoundRect(Const.LOBBY_BANNER_X, y, Const.LOBBY_BANNER_WIDTH, Const.LOBBY_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
+                graphics.setColor(Const.LARGE_BUTTON_BORDER_COLOR);
+                graphics.drawRoundRect(Const.LOBBY_BANNER_X, y, Const.LOBBY_BANNER_WIDTH, Const.LOBBY_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
+                name.draw(graphics);
+                playerCount.draw(graphics);
+                joinButton.draw(graphics);
+            }
+            public ServerButton joinButton(){
+                return this.joinButton;
+            }
+        }
     }
 }

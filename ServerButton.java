@@ -8,7 +8,6 @@
  */
 
 import java.awt.Color;
-import javax.swing.JPanel;
 import javax.swing.JFrame;
  
 import java.awt.event.MouseEvent;

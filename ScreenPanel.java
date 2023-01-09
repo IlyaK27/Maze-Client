@@ -25,8 +25,7 @@
          this.addComponentListener(this.FOCUS_WHEN_SHOWN);
      }
      public void paintComponent(Graphics graphics) {
-         super.paintComponent(graphics);
-         
+         super.paintComponent(graphics);  
          if (this.background != null) {
              this.background.draw(graphics, 0, 0);
          }

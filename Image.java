@@ -35,6 +35,6 @@
          return this.height;
      }
      public void draw(Graphics g, int x, int y) {
-         g.drawImage(this.picture, x, y, null);
+        g.drawImage(this.picture, x, y, null);
      }
  }

@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Font;
 import java.io.IOException;
+import java.util.HashMap;
 import java.awt.FontFormatException;
 import java.io.File;
 import java.awt.Rectangle;
@@ -13,11 +14,6 @@ public class Const{
     public static final Color INFO_RECT_COLOR = new Color(53, 28, 117);
     public static final Rectangle INFO_RECT = new Rectangle(0, 0, 2000, 100);
 
-
-    //public static final Color FONT_COLOR = Color.BLACK; 
-    //public static final Font BALL_FONT = new Font("Arial", Font.PLAIN, 20);
-    //public static final Font TITLE_FONT = new Font("Arial", Font.PLAIN, 40);
-
     // Fonts
     //private static final String TARRGET_FONT_FILE = "extra_files/fonts/TarrgetHalfToneItalic-ozyV.ttf";
     private static final String RAUBFONT_FONT_FILE = "extra_files/fonts/RaubFont.ttf";
@@ -25,6 +21,7 @@ public class Const{
     // Button values 
     public static final int BUTTON_HORIZONTAL_SPACE = 10;
     public static final int BUTTON_VERTICAL_SPACE = 5;
+    public static final int ABILITY_BUTTON_BORDER = 5;
     public static final int RADIUS = 40;
     public static final int LOBBY_INFO_X = 365;
     public static final int LOBBY_JOIN_X = 790;
@@ -32,12 +29,21 @@ public class Const{
     public static final int LOBBY_COUNT_Y_DIFFERENCE = 50; // How much lower the height of the player count is compared to the lobby name
     public static final int LOBBY_JOIN_Y_DIFFERENCE = 25; // How much lower the height of the player count is compared to the lobby name
     public static final int SPACE_BETWEEN_LOBBIES = 125;
+    public static final int SELECTED_ABILITY_CENTER_X = 100;
+    public static final int ABILITY_BANK_X = 263;
+    public static final int ABILITY_BANK_Y = 312;
+    public static final int ULTIMATE_BANK_Y = 653;
+    public static final int ABILITY_X_DIFFERENCE = 105;
+    public static final int ABILITY_Y_DIFFERENCE = 105;
     public static final int GO_BACK_X = 100;
     public static final int CONTINUE_X = 1100;
     public static final int GO_BACK_Y = 900;
     public static final int LOBBY_BANNER_WIDTH = 500;
     public static final int LOBBY_BANNER_HEIGHT = 100;
     public static final int LOBBY_BANNER_X = HALF_WIDTH - LOBBY_BANNER_WIDTH/2;
+    public static final Rectangle SELECTED_ABILITES_BOX =  new Rectangle(0, 270, 200, 850);
+    public static final Rectangle ABILITY_BANK_BOX =  new Rectangle(200, 270, 650, 360);
+    public static final Rectangle ULTIMATE_BANK_BOX =  new Rectangle(200, 640, 650, 210);
     
     public static final Font MENU_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 95);
     public static final Font TEXT_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 60);
@@ -53,6 +59,7 @@ public class Const{
 
     public static final int LOBBY_SIZE = 4;
     public static final int PLAYER_NAME_MAX_LENGTH = 8;
+    public static final int MAX_ABILITES_PER_ROW = 6;
 
     // Commands (See shared doc for more info)
     public static final String PING = "PING"; // Making sure client is still connected
@@ -64,6 +71,7 @@ public class Const{
 
     // Client to Lobby commands
     public static final String SELECTED = "SELECTED"; // Player has selected abilities
+    public static final String MY_ABILITIES = "MY_ABILITIES"; // Players abilities after this command
     public static final String RESELECT = "RESELECT"; // Player has gone to reselect abilities
     public static final String READY = "READY"; // Player has selected abilities and is ready to play
     public static final String UNREADY = "UNREADY"; // Player is not ready. Automatically happens when player goes to reselect abilities
@@ -102,7 +110,46 @@ public class Const{
     // Images
     public static final Image MENU_BACKGROUND = loadImage("extra_files/images/MenuBackground.png");
     public static final Image WALL_BACKGROUND = loadImage("extra_files/images/WallBackground.png");
+    public static final Image ABILITY_SELECT_BACKGROUND = loadImage("extra_files/images/AbilitySelectBackground.png");
     public static final Image BLANK_BACKGROUND = loadImage("extra_files/images/BlankBackground.png");
+
+    // Ability images
+    public static final Image BLANK_ABILITY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/BlankAbility.png");
+    public static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/TimeStop.png");
+    public static final Image SELF_HEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
+    public static final Image INVISIBILTY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Invisibility.png");
+
+    // Ability descriptions
+    public static final Image TIME_STOP_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/TimeStopDescription.png");
+    //public static final Image SELF_HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SelfHealDescription.png");
+    //public static final Image INVISIBILTY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvisbilityDescription.png");
+
+    // Ability hashmaps
+    public static final HashMap<String, Image> ABILITY_IMAGES = new HashMap<String, Image>(){ // Name, Image
+        {
+            put("SELF_HEAL", SELF_HEAL_IMAGE);
+            put("INVISBILITY", INVISIBILTY_IMAGE);
+        }
+    };
+
+    public static final HashMap<String, Image> ABILITY_DESCRIPTIONS = new HashMap<String, Image>(){ // Name, Description
+        {
+            put("SELF_HEAL", TIME_STOP_DESCRIPTION);
+            put("INVISBILITY", TIME_STOP_DESCRIPTION);
+        }
+    };
+
+    public static final HashMap<String, Image> ULTIMATE_IMAGES = new HashMap<String, Image>(){ // Name, Image
+        {
+            put("TIME_STOP", TIME_STOP_IMAGE);
+        }
+    };
+
+    public static final HashMap<String, Image> ULTIMATE_DESCRIPTIONS = new HashMap<String, Image>(){ // Name, Description
+        {
+            put("TIME_STOP", TIME_STOP_DESCRIPTION);
+        }
+    };
 
     private static Image loadImage(String imageName){
         Image image = new Image(imageName);
