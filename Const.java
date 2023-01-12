@@ -25,7 +25,6 @@ public class Const{
     public static final int RADIUS = 40;
     public static final int LOBBY_INFO_X = 365;
     public static final int LOBBY_JOIN_X = 790;
-    public static final int LOBBY_BANNER_START_Y = 305;
     public static final int LOBBY_COUNT_Y_DIFFERENCE = 50; // How much lower the height of the player count is compared to the lobby name
     public static final int LOBBY_JOIN_Y_DIFFERENCE = 25; // How much lower the height of the player count is compared to the lobby name
     public static final int SPACE_BETWEEN_LOBBIES = 125;
@@ -38,13 +37,29 @@ public class Const{
     public static final int GO_BACK_X = 100;
     public static final int CONTINUE_X = 1100;
     public static final int GO_BACK_Y = 900;
+    // Lobby Banner
     public static final int LOBBY_BANNER_WIDTH = 500;
     public static final int LOBBY_BANNER_HEIGHT = 100;
     public static final int LOBBY_BANNER_X = HALF_WIDTH - LOBBY_BANNER_WIDTH/2;
+    public static final int LOBBY_BANNER_START_Y = 305;
+
+    // Player Banner
+    public static final int PLAYER_BANNER_WIDTH = 200;
+    public static final int PLAYER_BANNER_START_X = 80 + PLAYER_BANNER_WIDTH / 2; // CenterX of the start playerBanner
+    public static final int PLAYER_BANNER_Y = 250;
+    public static final int PLAYER_BANNER_ABILITY1_Y = 400;
+    public static final int PLAYER_BANNER_ABILITY2_Y = 500;
+    public static final int PLAYER_BANNER_ULTIMATE_Y = 600;
+    public static final int READY_TEXT_Y = 700;
+    public static final int PLAYER_BANNER_HEIGHT = 600;
+    public static final int PLAYER_BANNER_X_DIFFERENCE = PLAYER_BANNER_WIDTH/2 + PLAYER_BANNER_START_X;
+
+    // Ability Select
     public static final Rectangle SELECTED_ABILITES_BOX =  new Rectangle(0, 270, 200, 850);
     public static final Rectangle ABILITY_BANK_BOX =  new Rectangle(200, 270, 650, 360);
     public static final Rectangle ULTIMATE_BANK_BOX =  new Rectangle(200, 640, 650, 210);
     
+    // Fonts
     public static final Font MENU_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 95);
     public static final Font TEXT_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 60);
     public static final Font SMALL_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 20);
@@ -90,6 +105,7 @@ public class Const{
     public static final String NO_LOBBY = "NO_LOBBY"; // Server tells the client it couldn't find a lobby with the name the client gave
 
     // Lobby to Client commands
+    public static final String NEW_PLAYER = "NEWP"; // New player has joined lobby 
     public static final String ABILITIES = "ABILITIES"; // Player has selected abilities
     public static final String REMOVEP = "REMOVEP"; // Player has left lobby, remove them from the player list
     public static final String NEWE = "NEWE"; // New enemy has spawned 
@@ -116,6 +132,7 @@ public class Const{
     // Ability images
     public static final Image BLANK_ABILITY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/BlankAbility.png");
     public static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/TimeStop.png");
+    //public static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
     public static final Image SELF_HEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
     public static final Image INVISIBILTY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Invisibility.png");
 

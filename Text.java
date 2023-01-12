@@ -44,8 +44,12 @@
      public String getText(){
          return this.text;
      }
-     public void setX(int x){
+    public void setX(int x){
         this.x = x;
+    }
+    public void setCenterX(int centerX){
+        this.centerX = centerX;
+        this.x = centerX - this.width/2;
     }
      public void setText(String newText){
          this.text = newText;

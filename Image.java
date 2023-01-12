@@ -15,26 +15,34 @@
      private BufferedImage picture;
      private int width;
      private int height;
+     private String picName;
      public Image(String picName) {
          // Load the image from file.
          this.tryLoadImage(picName);
          this.width = this.picture.getWidth();
          this.height = this.picture.getHeight();
      }
-     public void tryLoadImage(String picName) {
+    public void tryLoadImage(String picName) {
          try {
-             this.picture = ImageIO.read(new File(picName));
+            this.picture = ImageIO.read(new File(picName));
+            this.picName = picName;
+            this.width = this.picture.getWidth();
+            this.height = this.picture.getHeight();
          } catch (IOException ex) {
-             System.out.println("File not found! (" + picName + ")");
+            System.out.println("File not found! (" + picName + ")");
+            picture = null;
          }
-     }
-     public int getWidth() {
-         return this.width;
-     }   
-     public int getHeight() {
-         return this.height;
-     }
-     public void draw(Graphics g, int x, int y) {
+    }
+    public int getWidth() {
+        return this.width;
+    }   
+    public int getHeight() {
+        return this.height;
+    }
+    public String getPicName(){
+        return this.picName;
+    }
+    public void draw(Graphics g, int x, int y) {
         g.drawImage(this.picture, x, y, null);
-     }
+    }
  }
