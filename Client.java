@@ -196,6 +196,17 @@ public class Client {
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
                         swapper.swap();
                         abilitySelectScreen.resetButtons();
+                        lobbyScreen.clearBanners();
+                    }
+                    else if(updateInfo[0].equals(Const.REMOVEP)){ // This command is given when a new player joins the lobby
+                        String playerName = updateInfo[1]; 
+                        lobbyScreen.removePlayerBanner(playerName);
+                    }
+                    else if(updateInfo[0].equals(Const.RESELECT)){ // This command is given when a new player joins the lobby
+                        String playerName = updateInfo[1]; 
+                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, ABILITY_SELECT_PANEL);
+                        swapper.swap();
+                        lobbyScreen.updatePlayerBanner(playerName, false);
                     }
                     else if(updateInfo[0].equals(Const.MY_ABILITIES)){ // This command is given after the player selected their abilities
                         Client.ServerWriter writer = new Client.ServerWriter(output);
@@ -207,11 +218,19 @@ public class Client {
                         String ability2 = updateInfo[3];
                         String ultimate = updateInfo[4];
                         lobbyScreen.updatePlayerBanner(playerName, ability1, ability2, ultimate);
-                        if(updateInfo[5] != null && updateInfo[5].equals("ME")){ // This is done so that the player cant swap screens until they have chosen all of their abilities
+                        if(updateInfo.length > 5 && updateInfo[5].equals("ME")){ // This is done so that the player cant swap screens until they have chosen all of their abilities
                             lobbyScreen.updateLobbyTitle();
                             Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
                             swapper.swap();
                         }
+                    }
+                    else if(updateInfo[0].equals(Const.READY)){ // This command is given after a player is ready to play
+                        String playerName = updateInfo[1];
+                        lobbyScreen.updatePlayerBanner(playerName, true);
+                    }
+                    else if(updateInfo[0].equals(Const.UNREADY)){ // This command is given after a player is ready to play
+                        String playerName = updateInfo[1];
+                        lobbyScreen.updatePlayerBanner(playerName, false);
                     }
                     /* From lobby
                     else if(updateInfo[0].equals(Const.JOIN)){
@@ -706,7 +725,7 @@ public class Client {
 
     public class LobbyPanel extends ScreenPanel {
         private Text lobbyTitle;
-        private ServerButton continueButton;
+        private ServerButton readyButton;
         private ServerButton backButton;
         private ArrayList<PlayerBanner> playerBanners;
         //private TextButton creditsButton;
@@ -715,19 +734,19 @@ public class Client {
             super(backgroundSprite);
             this.lobbyTitle = new Text("", Const.MENU_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 125);
             // Initialize the buttons.
-            Text continueText = new Text("Continue", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y);
-            this.continueButton = new ServerButton(window, output, continueText, Const.SELECTED ,Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+            Text readyText = new Text("Ready", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y);
+            this.readyButton = new ServerButton(window, output, readyText, Const.READY ,Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.SMALL_BUTTON_HOVER_COLOR, Const.CONTINUE_X, Const.GO_BACK_Y, Const.RADIUS);
             
             Text backText = new Text("Go back", Const.SMALL_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y);
-            this.backButton = new ServerButton(window, output, backText, Const.LEAVE, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+            this.backButton = new ServerButton(window, output, backText, Const.RESELECT, Const.SMALL_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.SMALL_BUTTON_HOVER_COLOR, Const.GO_BACK_X, Const.GO_BACK_Y, Const.RADIUS);
-            
+
             playerBanners = new ArrayList<PlayerBanner>();
 
             // Add the listeners for the screens.
-            this.addMouseListener(continueButton.new BasicMouseListener());
-            this.addMouseMotionListener(continueButton.new InsideButtonMotionListener());
+            this.addMouseListener(readyButton.new BasicMouseListener());
+            this.addMouseMotionListener(readyButton.new InsideButtonMotionListener());
             this.addMouseListener(backButton.new BasicMouseListener());
             this.addMouseMotionListener(backButton.new InsideButtonMotionListener());
 
@@ -737,7 +756,7 @@ public class Client {
         public void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
             lobbyTitle.draw(graphics);
-            this.continueButton.draw(graphics);
+            this.readyButton.draw(graphics);
             this.backButton.draw(graphics);
             for(int i = 0; i < playerBanners.size(); i++){
                 playerBanners.get(i).draw(graphics, Const.PLAYER_BANNER_START_X + (Const.PLAYER_BANNER_X_DIFFERENCE * i));
@@ -751,12 +770,35 @@ public class Client {
         public void updatePlayerBanner(String playerName, String ability1, String ability2, String ultimate) {
             for (PlayerBanner playerBanner: playerBanners){
                 if(playerBanner.name().equals(playerName)){
+                    System.out.println("updateplayerBanner" + playerBanner.name() + " " + (playerName));
                     playerBanner.updateAbilities(ability1, ability2, ultimate);
                     break;
                 }
             }
             System.out.println("Abilites  = " + ability1 + " " + ability2 + " " + ultimate);
             window.repaint();
+        }
+        public void updatePlayerBanner(String playerName, boolean ready) {
+            for (PlayerBanner playerBanner: playerBanners){
+                if(playerBanner.name().equals(playerName)){
+                    playerBanner.updateReady(ready);
+                    break;
+                }
+            }
+            System.out.println("Ready");
+            window.repaint();
+        }
+        public void removePlayerBanner(String playerName) {
+            for (PlayerBanner player: playerBanners){
+                if(player.name().equals(playerName)){
+                    playerBanners.remove(player);
+                    break;
+                }
+            }
+            window.repaint();
+        }
+        public void clearBanners() {
+            playerBanners.clear();
         }
         public void updateLobbyTitle() {
             this.lobbyTitle.setText(lobbyName + " lobby");
@@ -806,6 +848,9 @@ public class Client {
                 this.ability1 = Const.ABILITY_IMAGES.get(ability1);
                 this.ability2 = Const.ABILITY_IMAGES.get(ability2);
                 this.ultimate = Const.ULTIMATE_IMAGES.get(ultimate);
+            }
+            public void updateReady(boolean ready){
+                this.ready = ready;
             }
         }
     }
