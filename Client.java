@@ -869,6 +869,8 @@ public class Client {
         private String ultimate;
         private HashMap<String, Image> abilityImages;
         private HashMap<String, Boolean> abilitiesReady;
+        private ArrayList<Player> players;
+        private ArrayList<Enemy> enemies;
         public GamePanel(Image backgroundSprite) {
             super(backgroundSprite);
             ability1 = "ABILITY1"; ability2 = "ABILITY2"; ultimate = "ULTIMATE";
@@ -884,7 +886,7 @@ public class Client {
             super.paintComponent(graphics);
             // Drawing player info bar on bottom middle of screen
             graphics.setColor(Const.LARGE_BUTTON_FONT_COLOR);
-            graphics.fillRect((int)Const.PLAYER_INFO_RECT.getX(), (int)Const.PLAYER_INFO_RECT.getY(), (int)Const.PLAYER_INFO_RECT.getWidth(), (int)Const.PLAYER_INFO_RECT.getHeight());
+            graphics.fillRoundRect((int)Const.PLAYER_INFO_RECT.getX(), (int)Const.PLAYER_INFO_RECT.getY(), (int)Const.PLAYER_INFO_RECT.getWidth(), (int)Const.PLAYER_INFO_RECT.getHeight(), Const.RADIUS, Const.RADIUS);
             int counter = 0;
             for(String ability: abilitiesReady.keySet()){
                 if(abilitiesReady.get(ability)){
@@ -901,6 +903,47 @@ public class Client {
             abilityImages.replace(ability1, Const.ABILITY_IMAGES.get(ability1Name));
             abilityImages.replace(ability2, Const.ABILITY_IMAGES.get(ability2Name));
             abilityImages.replace(ultimate, Const.ULTIMATE_IMAGES.get(ultimateName));
+        }
+        public void addEnemy(int x, int y){
+            Enemy enemy = new Enemy(x, y);
+            enemies.add(enemy);
+        }
+        public void addPlayer(String playerName, String color, int x, int y){
+            Player player = new Player(playerName, color, x, y);
+            players.add(player);
+        }
+        public void updatePlayer(String playerName, int x, int y){
+            for(Player player: players){
+                if(playerName.equals(player.name())){
+                    player.setCoords(x,y);
+                    break;
+                }
+            }
+        }
+        public void updateEnemy(int x, int y, int enemyID, int angle){
+            Enemy enemy = enemies.get(enemyID);
+            enemy.setCoords(x,y);
+            enemy.setAngle(angle);
+        }
+        public void revivePlayer(String playerName){
+
+        }
+        public void downPlayer(String playerName){
+
+        }
+        public void killPlayer(){
+
+        }
+        public void removePlayer(String playerName){
+            for(Player player: players){
+                if(playerName.equals(player.name())){
+                    players.remove(player);
+                    break;
+                }
+            }
+        }
+        public void removeEnemy(int enemyID){
+            enemies.remove(enemies.get(enemyID));
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
             public void componentShown(ComponentEvent event){
