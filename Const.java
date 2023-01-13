@@ -47,11 +47,12 @@ public class Const{
     public static final int PLAYER_BANNER_WIDTH = 200;
     public static final int PLAYER_BANNER_START_X = 80 + PLAYER_BANNER_WIDTH / 2; // CenterX of the start playerBanner
     public static final int PLAYER_BANNER_Y = 250;
-    public static final int PLAYER_BANNER_ABILITY1_Y = 400;
-    public static final int PLAYER_BANNER_ABILITY2_Y = 500;
-    public static final int PLAYER_BANNER_ULTIMATE_Y = 600;
-    public static final int READY_TEXT_Y = 700;
-    public static final int PLAYER_BANNER_HEIGHT = 600;
+    public static final int PLAYER_BANNER_IMAGE_Y = 330;
+    public static final int PLAYER_BANNER_ABILITY1_Y = 435;
+    public static final int PLAYER_BANNER_ABILITY2_Y = 535;
+    public static final int PLAYER_BANNER_ULTIMATE_Y = 635;
+    public static final int READY_TEXT_Y = 740;
+    public static final int PLAYER_BANNER_HEIGHT = 550;
     public static final int PLAYER_BANNER_X_DIFFERENCE = PLAYER_BANNER_WIDTH/2 + PLAYER_BANNER_START_X;
 
     // Ability Select
@@ -138,15 +139,25 @@ public class Const{
 
     // Ability images
     public static final Image BLANK_ABILITY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/BlankAbility.png");
-    public static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/TimeStop.png");
+    private static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/TimeStop.png");
     //public static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
-    public static final Image SELF_HEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
-    public static final Image INVISIBILTY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Invisibility.png");
+    private static final Image SELF_HEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
+    private static final Image INVISIBILTY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Invisibility.png");
 
     // Ability descriptions
-    public static final Image TIME_STOP_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/TimeStopDescription.png");
-    //public static final Image SELF_HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SelfHealDescription.png");
-    //public static final Image INVISIBILTY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvisbilityDescription.png");
+    private static final Image TIME_STOP_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/TimeStopDescription.png");
+    //private static final Image SELF_HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SelfHealDescription.png");
+    //private static final Image INVISIBILTY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvisbilityDescription.png");
+
+    // Player images
+    public static final HashMap<String, Image> PLAYER_ICONS = new HashMap<String, Image>(){ // Name, Image
+        {
+            put("BLUE", loadImage("extra_files/images/player_icons/BlueIcon.png"));
+            put("GREEN", loadImage("extra_files/images/player_icons/GreenIcon.png"));
+            put("YELLOW", loadImage("extra_files/images/player_icons/YellowIcon.png"));
+            put("ORANGE", loadImage("extra_files/images/player_icons/OrangeIcon.png"));
+        }
+    };
 
     // Ability hashmaps
     public static final HashMap<String, Image> ABILITY_IMAGES = new HashMap<String, Image>(){ // Name, Image

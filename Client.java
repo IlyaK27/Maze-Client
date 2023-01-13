@@ -184,8 +184,7 @@ public class Client {
                     // From lobby
                     else if(updateInfo[0].equals(Const.NEW_PLAYER)){ // This command is given when a new player joins the lobby
                         String newPlayerName = updateInfo[1]; 
-                        String colorHexCode = updateInfo[2]; 
-                        Color playerColor = Color.decode(colorHexCode);
+                        String playerColor = updateInfo[2]; 
                         lobbyScreen.newPlayerBanner(newPlayerName, playerColor);
                         if(newPlayerName.equals(lobbySelectScreen.name())){
                             Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, ABILITY_SELECT_PANEL);
@@ -766,7 +765,7 @@ public class Client {
                 playerBanners.get(i).draw(graphics, Const.PLAYER_BANNER_START_X + (Const.PLAYER_BANNER_X_DIFFERENCE * i));
             }
         }
-        public void newPlayerBanner(String playerName, Color color) {
+        public void newPlayerBanner(String playerName, String color) {
             PlayerBanner playerBanner = new PlayerBanner(playerName, color);
             playerBanners.add(playerBanner);
             window.repaint();
@@ -824,19 +823,19 @@ public class Client {
             private Image ability2;
             private Image ultimate;
             private boolean ready;
-            PlayerBanner(String name, Color color){
+            PlayerBanner(String name, String color){
                 this.name = new Text(name, Const.LOBBY_BANNER_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, 0, Const.PLAYER_BANNER_Y + 20);
+                this.playerImage = Const.PLAYER_ICONS.get(color);
                 this.ability1 = Const.BLANK_ABILITY_IMAGE;  
                 this.ability2 = Const.BLANK_ABILITY_IMAGE;  
                 this.ultimate = Const.BLANK_ABILITY_IMAGE;  
             }
             public void draw(Graphics graphics, int centerX){
-                graphics.setColor(Const.LARGE_BUTTON_IN_COLOR);
-                graphics.fillRoundRect(centerX - Const.PLAYER_BANNER_WIDTH/2, Const.PLAYER_BANNER_Y, Const.PLAYER_BANNER_WIDTH, Const.PLAYER_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
                 graphics.setColor(Const.LARGE_BUTTON_BORDER_COLOR);
                 graphics.fillRoundRect(centerX - Const.PLAYER_BANNER_WIDTH/2, Const.PLAYER_BANNER_Y, Const.PLAYER_BANNER_WIDTH, Const.PLAYER_BANNER_HEIGHT, Const.RADIUS, Const.RADIUS);
                 name.setCenterX(centerX);
                 name.draw(graphics);
+                playerImage.draw(graphics, centerX - playerImage.getWidth()/2, Const.PLAYER_BANNER_IMAGE_Y);
                 ability1.draw(graphics, centerX - ability1.getWidth()/2, Const.PLAYER_BANNER_ABILITY1_Y);
                 ability2.draw(graphics, centerX - ability2.getWidth()/2, Const.PLAYER_BANNER_ABILITY2_Y);
                 ultimate.draw(graphics, centerX - ultimate.getWidth()/2, Const.PLAYER_BANNER_ULTIMATE_Y);
