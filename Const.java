@@ -59,6 +59,12 @@ public class Const{
     public static final Rectangle ABILITY_BANK_BOX =  new Rectangle(200, 270, 650, 360);
     public static final Rectangle ULTIMATE_BANK_BOX =  new Rectangle(200, 640, 650, 210);
     
+    // Game screen
+    public static final int ABILITY_1_X = Const.HALF_WIDTH - 140;
+    public static final int ABILITIES_X_DIFFERENCE = 100;
+    public static final int ABILITIES_Y = Const.HEIGHT - 140;
+    public static final Rectangle PLAYER_INFO_RECT =  new Rectangle(Const.HALF_WIDTH - 150, ABILITIES_Y - 20, 300, Const.HEIGHT - ABILITIES_Y + 20);
+
     // Fonts
     public static final Font MENU_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 95);
     public static final Font TEXT_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 60);
@@ -106,6 +112,7 @@ public class Const{
 
     // Lobby to Client commands
     public static final String NEW_PLAYER = "NEWP"; // New player has joined lobby 
+    public static final String GAME_START = "GAME_START"; // Tells players game has started and to switch to game screen
     public static final String ABILITIES = "ABILITIES"; // Player has selected abilities
     public static final String REMOVEP = "REMOVEP"; // Player has left lobby, remove them from the player list
     public static final String NEWE = "NEWE"; // New enemy has spawned 

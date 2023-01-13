@@ -16,7 +16,7 @@ public class Client {
     private LobbySelectPanel lobbySelectScreen;
     private AbilitySelectPanel abilitySelectScreen;
     private LobbyPanel lobbyScreen;
-    private JPanel gameScreen;
+    private GamePanel gameScreen;
     private JPanel howToPlayScreen;
     private JPanel midRoundScreen;
     private JPanel gameOverScreen;
@@ -218,6 +218,7 @@ public class Client {
                         String ability2 = updateInfo[3];
                         String ultimate = updateInfo[4];
                         lobbyScreen.updatePlayerBanner(playerName, ability1, ability2, ultimate);
+                        gameScreen.setAbilities(ability1, ability2, ultimate);
                         if(updateInfo.length > 5 && updateInfo[5].equals("ME")){ // This is done so that the player cant swap screens until they have chosen all of their abilities
                             lobbyScreen.updateLobbyTitle();
                             Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
@@ -231,6 +232,11 @@ public class Client {
                     else if(updateInfo[0].equals(Const.UNREADY)){ // This command is given after a player is ready to play
                         String playerName = updateInfo[1];
                         lobbyScreen.updatePlayerBanner(playerName, false);
+                    }
+                    else if(updateInfo[0].equals(Const.GAME_START)){
+                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, GAME_PANEL);
+                        swapper.swap();
+                        lobbyScreen.resetBanners();
                     }
                     /* From lobby
                     else if(updateInfo[0].equals(Const.JOIN)){
@@ -319,16 +325,14 @@ public class Client {
 
         public MenuPanel(Image backgroundSprite) {
             super(backgroundSprite);
-            Font buttonFont = Const.MENU_BUTTON_FONT;
-            Color fontColor = Const.LARGE_BUTTON_FONT_COLOR;
             // Initialize the buttons.
             int playY = 300;
-            Text playButtonText = new Text("Play", buttonFont, fontColor, Const.HALF_WIDTH, playY);
+            Text playButtonText = new Text("Play", Const.MENU_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, playY);
             this.playButton = new ServerButton(window, output, playButtonText, Const.LOBBIES_LIST, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, playY, Const.RADIUS);
             
             int howToPlayY = 470;
-            Text howToPlayButtonText = new Text("How To Play", buttonFont, fontColor, Const.HALF_WIDTH, howToPlayY);
+            Text howToPlayButtonText = new Text("How To Play", Const.MENU_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, howToPlayY);
             this.howToPlayButton = new TextButton(window, cards, HOW_TO_PLAY_PANEL, howToPlayButtonText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, howToPlayY, Const.RADIUS);
             
@@ -797,8 +801,13 @@ public class Client {
             }
             window.repaint();
         }
-        public void clearBanners() {
+        public void resetBanners() {
             playerBanners.clear();
+        }
+        public void clearBanners() {
+            for (PlayerBanner player: playerBanners){
+                player.updateReady(false);
+            }
         }
         public void updateLobbyTitle() {
             this.lobbyTitle.setText(lobbyName + " lobby");
@@ -856,45 +865,43 @@ public class Client {
     }
 
     public class GamePanel extends ScreenPanel {
-        private ServerButton playButton;
-        private TextButton howToPlayButton;
-        //private TextButton creditsButton;
-
+        private String ability1;
+        private String ability2;
+        private String ultimate;
+        private HashMap<String, Image> abilityImages;
+        private HashMap<String, Boolean> abilitiesReady;
         public GamePanel(Image backgroundSprite) {
             super(backgroundSprite);
-            Font buttonFont = Const.MENU_BUTTON_FONT;
-            Color fontColor = Const.LARGE_BUTTON_FONT_COLOR;
-            // Initialize the buttons.
-            int playY = 300;
-            Text playButtonText = new Text("Playing", buttonFont, fontColor, Const.HALF_WIDTH, playY);
-            this.playButton = new ServerButton(window, output, playButtonText, Const.LOBBIES_LIST, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, playY, Const.RADIUS);
-            
-            int howToPlayY = 470;
-            Text howToPlayButtonText = new Text("How To Play", buttonFont, fontColor, Const.HALF_WIDTH, howToPlayY);
-            this.howToPlayButton = new TextButton(window, cards, HOW_TO_PLAY_PANEL, howToPlayButtonText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, howToPlayY, Const.RADIUS);
-            
-            
-            /*this.creditsButton = new TextButton(window, cards, CREDITS_PANEL, "Credits", buttonFont, fontColor, 
-                                         Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 770, Const.RADIUS);*/
-            
+            ability1 = "ABILITY1"; ability2 = "ABILITY2"; ultimate = "ULTIMATE";
+            abilityImages = new HashMap<String, Image>();
+            abilityImages.put(ability1, Const.BLANK_ABILITY_IMAGE); abilityImages.put(ability2, Const.BLANK_ABILITY_IMAGE); abilityImages.put(ultimate, Const.BLANK_ABILITY_IMAGE);
+            abilitiesReady = new HashMap<String, Boolean>();
+            abilitiesReady.put(ability1, true); abilitiesReady.put(ability2, true); abilitiesReady.put(ultimate, true);
             // Add the listeners for the screens.
-            this.addMouseListener(playButton.new BasicMouseListener());
-            this.addMouseMotionListener(playButton.new InsideButtonMotionListener());
-            this.addMouseListener(howToPlayButton.new BasicMouseListener());
-            this.addMouseMotionListener(howToPlayButton.new InsideButtonMotionListener());
-            //this.addMouseListener(creditsButton.new BasicMouseListener());
-            //this.addMouseMotionListener(creditsButton.new InsideButtonMotionListener());
             this.setFocusable(true);
             this.addComponentListener(this.FOCUS_WHEN_SHOWN);
         }
         public void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
-            this.playButton.draw(graphics);
-            this.howToPlayButton.draw(graphics);
+            // Drawing player info bar on bottom middle of screen
+            graphics.setColor(Const.LARGE_BUTTON_FONT_COLOR);
+            graphics.fillRect((int)Const.PLAYER_INFO_RECT.getX(), (int)Const.PLAYER_INFO_RECT.getY(), (int)Const.PLAYER_INFO_RECT.getWidth(), (int)Const.PLAYER_INFO_RECT.getHeight());
+            int counter = 0;
+            for(String ability: abilitiesReady.keySet()){
+                if(abilitiesReady.get(ability)){
+                    abilityImages.get(ability).draw(graphics, Const.ABILITY_1_X + (counter * Const.ABILITIES_X_DIFFERENCE), Const.ABILITIES_Y);
+                }else{
+                    Const.BLANK_ABILITY_IMAGE.draw(graphics, Const.ABILITY_1_X + (counter * Const.ABILITIES_X_DIFFERENCE), Const.ABILITIES_Y);
+                }
+                counter++;
+            }
+            
             //this.creditsButton.draw(graphics);
+        }
+        public void setAbilities(String ability1Name, String ability2Name, String ultimateName){
+            abilityImages.replace(ability1, Const.ABILITY_IMAGES.get(ability1Name));
+            abilityImages.replace(ability2, Const.ABILITY_IMAGES.get(ability2Name));
+            abilityImages.replace(ultimate, Const.ULTIMATE_IMAGES.get(ultimateName));
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
             public void componentShown(ComponentEvent event){
