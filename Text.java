@@ -58,23 +58,29 @@
      }
  //------------------------------------------------------------------------------
  // Methods
-     // Using AffineTransform and FontRenderContext to get the dimensions of the font
-     private int getTextWidth() {
-         AffineTransform affineTransform = new AffineTransform();     
-         FontRenderContext frc = new FontRenderContext(affineTransform,true,true);     
-         int textWidth = (int)(this.font.getStringBounds(this.text, frc).getWidth());
-         return textWidth;
-     }
-     private int getTextHeight() {
-         AffineTransform affineTransform = new AffineTransform();     
-         FontRenderContext frc = new FontRenderContext(affineTransform,true,true);     
-         int textHeight = (int)(this.font.getStringBounds(this.text, frc).getHeight());
-         return textHeight;
-     }
-     public void draw(Graphics graphics) {
-         ((Graphics2D)graphics).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-         graphics.setFont(this.font); 
-         graphics.setColor(this.color);
-         graphics.drawString(this.text, this.x, this.y + this.fontSize);
-     }
- }
+    // Using AffineTransform and FontRenderContext to get the dimensions of the font
+    private int getTextWidth() {
+        AffineTransform affineTransform = new AffineTransform();     
+        FontRenderContext frc = new FontRenderContext(affineTransform,true,true);     
+        int textWidth = (int)(this.font.getStringBounds(this.text, frc).getWidth());
+        return textWidth;
+    }
+    private int getTextHeight() {
+        AffineTransform affineTransform = new AffineTransform();     
+        FontRenderContext frc = new FontRenderContext(affineTransform,true,true);     
+        int textHeight = (int)(this.font.getStringBounds(this.text, frc).getHeight());
+        return textHeight;
+    }
+    public void draw(Graphics graphics) {
+        ((Graphics2D)graphics).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setFont(this.font); 
+        graphics.setColor(this.color);
+        graphics.drawString(this.text, this.x, this.y + this.fontSize);
+    }
+    public void draw(Graphics graphics, int centerX, int y) {
+        ((Graphics2D)graphics).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setFont(this.font); 
+        graphics.setColor(this.color);
+        graphics.drawString(this.text, centerX - this.width/2, y + this.fontSize);
+    }
+}

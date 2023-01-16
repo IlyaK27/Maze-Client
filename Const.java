@@ -10,9 +10,12 @@ public class Const{
     // Screen width and height
     public static final int WIDTH = 1200;
     public static final int HALF_WIDTH = WIDTH/2;
+    public static final int ADJUST_WIDTH = 16; // Without this variable the screens width happens to be WIDTH - 16 for some reason
     public static final int HEIGHT = 1000;
-    public static final Color INFO_RECT_COLOR = new Color(53, 28, 117);
-    public static final Rectangle INFO_RECT = new Rectangle(0, 0, 2000, 100);
+    public static final int GAME_TITLE_HEIGHT = 100;
+    public static final int HALF_HEIGHT = (HEIGHT - GAME_TITLE_HEIGHT)/2 + GAME_TITLE_HEIGHT; // Minus 100 because we aren't including the Games name at the top of the screen
+    public static final int ADJUST_HEIGHT = 39;  // Without this variable the screens height happens to be HEIGHT - 39 for some reason
+    public static final Image GAME_TITLE = loadImage("extra_files/images/GameTitle.png");
 
     // Fonts
     //private static final String TARRGET_FONT_FILE = "extra_files/fonts/TarrgetHalfToneItalic-ozyV.ttf";
@@ -36,7 +39,7 @@ public class Const{
     public static final int ABILITY_Y_DIFFERENCE = 105;
     public static final int GO_BACK_X = 100;
     public static final int CONTINUE_X = 1100;
-    public static final int GO_BACK_Y = 900;
+    public static final int GO_BACK_Y = 925;
     // Lobby Banner
     public static final int LOBBY_BANNER_WIDTH = 500;
     public static final int LOBBY_BANNER_HEIGHT = 100;
@@ -46,12 +49,12 @@ public class Const{
     // Player Banner
     public static final int PLAYER_BANNER_WIDTH = 200;
     public static final int PLAYER_BANNER_START_X = 80 + PLAYER_BANNER_WIDTH / 2; // CenterX of the start playerBanner
-    public static final int PLAYER_BANNER_Y = 250;
-    public static final int PLAYER_BANNER_IMAGE_Y = 330;
-    public static final int PLAYER_BANNER_ABILITY1_Y = 435;
-    public static final int PLAYER_BANNER_ABILITY2_Y = 535;
-    public static final int PLAYER_BANNER_ULTIMATE_Y = 635;
-    public static final int READY_TEXT_Y = 740;
+    public static final int PLAYER_BANNER_Y = 270;
+    public static final int PLAYER_BANNER_IMAGE_Y = 350;
+    public static final int PLAYER_BANNER_ABILITY1_Y = 455;
+    public static final int PLAYER_BANNER_ABILITY2_Y = 555;
+    public static final int PLAYER_BANNER_ULTIMATE_Y = 655;
+    public static final int READY_TEXT_Y = 760;
     public static final int PLAYER_BANNER_HEIGHT = 550;
     public static final int PLAYER_BANNER_X_DIFFERENCE = PLAYER_BANNER_WIDTH/2 + PLAYER_BANNER_START_X;
 
@@ -61,15 +64,16 @@ public class Const{
     public static final Rectangle ULTIMATE_BANK_BOX =  new Rectangle(200, 640, 650, 210);
     
     // Game screen
-    public static final int ABILITY_1_X = Const.HALF_WIDTH - 140;
+    public static final int ABILITY_1_X = Const.HALF_WIDTH - 75;
     public static final int ABILITIES_X_DIFFERENCE = 100;
-    public static final int ABILITIES_Y = Const.HEIGHT - 140;
-    public static final Rectangle PLAYER_INFO_RECT =  new Rectangle(Const.HALF_WIDTH - 150, ABILITIES_Y - 20, 300, Const.HEIGHT - ABILITIES_Y + 20);
+    public static final int ABILITIES_Y = Const.HEIGHT - 115;
+    public static final Rectangle PLAYER_INFO_RECT =  new Rectangle(Const.HALF_WIDTH - 225, ABILITIES_Y - 19, 450, Const.HEIGHT - ABILITIES_Y);
 
     // Fonts
     public static final Font MENU_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 95);
     public static final Font TEXT_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 60);
     public static final Font SMALL_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 20);
+    public static final Font PLAYER_NAME_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 15);
     public static final Font LOBBY_BANNER_BUTTON_FONT = loadFont(RAUBFONT_FONT_FILE, Font.TRUETYPE_FONT, Font.PLAIN, 35);
     public static final Color LARGE_BUTTON_FONT_COLOR = new Color(153, 217, 234);
 
@@ -78,10 +82,13 @@ public class Const{
     public static final Color LARGE_BUTTON_HOVER_COLOR = new Color(113, 105, 150);
     public static final Color SMALL_BUTTON_IN_COLOR = new Color(153, 153, 153); // Grey
     public static final Color SMALL_BUTTON_HOVER_COLOR = new Color(102, 102, 102); // Dark Grey
+    public static final Color PLAYER_NAME_COLOR = new Color(0, 10, 21);
 
     public static final int LOBBY_SIZE = 4;
     public static final int PLAYER_NAME_MAX_LENGTH = 8;
     public static final int MAX_ABILITES_PER_ROW = 6;
+    public static final int TILE_DIMENSIONS = 150;
+    public static final int PLAYER_DIMENSIONS = 110;
 
     // Commands (See shared doc for more info)
     public static final String PING = "PING"; // Making sure client is still connected
@@ -102,6 +109,7 @@ public class Const{
     public static final String ABILITY1 = "ABILITY1"; // Client used first ability  
     public static final String ABILITY2 = "ABILITY2"; // Client used second ability
     public static final String ULTIMATE = "ULTIMATE"; // Client used ultimate ability
+    public static final String DRAWN = "DRAWN"; // Client has drawn their map so send new map update
     public static final String LEAVE = "LEAVE"; // Client left lobby
 
     // Server to Client commands
@@ -114,6 +122,8 @@ public class Const{
     // Lobby to Client commands
     public static final String NEW_PLAYER = "NEWP"; // New player has joined lobby 
     public static final String GAME_START = "GAME_START"; // Tells players game has started and to switch to game screen
+    public static final String UPDATE_MAP = "UPDATE_MAP"; // Updates a certian part of the map for the client
+    public static final String DRAW_MAP = "DRAW_MAP"; // Tells the client to draw the map and lets them know the map will be updated shortly
     public static final String ABILITIES = "ABILITIES"; // Player has selected abilities
     public static final String REMOVEP = "REMOVEP"; // Player has left lobby, remove them from the player list
     public static final String NEWE = "NEWE"; // New enemy has spawned 
@@ -126,10 +136,6 @@ public class Const{
     public static final String ABILITY1_READY = "ABILITY1"; // Tells client their first ability is off cooldown
     public static final String ABILITY2_READY = "ABILITY2"; // Tells client their second ability is off cooldown
     public static final String ULTIMATE_READY = "ULTIMATE"; // Tells client their ultimate ability is off cooldown
-    public static final String BOUNDS = "BOUNDS"; // Tells client the size of the play area
-    public static final String START = "START"; // Tells client there is a start tile here
-    public static final String END = "END"; // Tells client there is a end tile here
-    public static final String WALl = "WALL"; //Tells client there is a wall tile here
 
     // Images
     public static final Image MENU_BACKGROUND = loadImage("extra_files/images/MenuBackground.png");
@@ -149,13 +155,48 @@ public class Const{
     //private static final Image SELF_HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SelfHealDescription.png");
     //private static final Image INVISIBILTY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvisbilityDescription.png");
 
-    // Player images
+    // Player images, Icons are for lobby and images are for actual in game and have different directions, they are also a bit larger too.
     public static final HashMap<String, Image> PLAYER_ICONS = new HashMap<String, Image>(){ // Name, Image
         {
-            put("BLUE", loadImage("extra_files/images/player_icons/BlueIcon.png"));
-            put("GREEN", loadImage("extra_files/images/player_icons/GreenIcon.png"));
-            put("YELLOW", loadImage("extra_files/images/player_icons/YellowIcon.png"));
-            put("ORANGE", loadImage("extra_files/images/player_icons/OrangeIcon.png"));
+            put("BLUE", loadImage("extra_files/images/player/BlueIcon.png"));
+            put("GREEN", loadImage("extra_files/images/player/GreenIcon.png"));
+            put("YELLOW", loadImage("extra_files/images/player/YellowIcon.png"));
+            put("ORANGE", loadImage("extra_files/images/player/OrangeIcon.png"));
+        }
+    };
+     // 0 - up, 1 - left, 2 - down, 3 - right
+    private static final Image[] BLUE_IMAGES = {loadImage("extra_files/images/player/BluePlayer0.png"), loadImage("extra_files/images/player/BluePlayer1.png"), loadImage("extra_files/images/player/BluePlayer2.png"), loadImage("extra_files/images/player/BluePlayer3.png")};
+    private static final Image[] GREEN_IMAGES = {loadImage("extra_files/images/player/GreenPlayer0.png"), loadImage("extra_files/images/player/GreenPlayer1.png"), loadImage("extra_files/images/player/GreenPlayer2.png"), loadImage("extra_files/images/player/GreenPlayer3.png")};
+    private static final Image[] YELLOW_IMAGES = {loadImage("extra_files/images/player/YellowPlayer0.png"), loadImage("extra_files/images/player/YellowPlayer1.png"), loadImage("extra_files/images/player/YellowPlayer2.png"), loadImage("extra_files/images/player/YellowPlayer3.png")};
+    private static final Image[] ORANGE_IMAGES = {loadImage("extra_files/images/player/OrangePlayer0.png"), loadImage("extra_files/images/player/OrangePlayer1.png"), loadImage("extra_files/images/player/OrangePlayer2.png"), loadImage("extra_files/images/player/OrangePlayer3.png")};
+    public static final HashMap<String, Image[]> PLAYER_IMAGES = new HashMap<String, Image[]>(){ // Name, Image
+        {
+            put("BLUE", BLUE_IMAGES);
+            put("GREEN", GREEN_IMAGES);
+            put("YELLOW", YELLOW_IMAGES);
+            put("ORANGE", ORANGE_IMAGES);
+        }
+    };
+    private static final Integer[] HORIZONTAL_CORRECTION = {- 30, 0};
+    private static final Integer[] NO_CORRECTION = {0, 0};
+    private static final Integer[] VERTICAL_CORRECTION = {0, -30};
+    public static final HashMap<Integer, Integer[]> PLAYER_IMAGE_CORRECTIONS = new HashMap<Integer, Integer[]>(){ // Direction, correction
+        { // x - 0, y - 1
+            put(0, VERTICAL_CORRECTION); 
+            put(1, NO_CORRECTION);
+            put(2, NO_CORRECTION);
+            put(3, HORIZONTAL_CORRECTION);
+        }
+    };
+
+    // Tile images 
+    public static final HashMap<Character, Image> TILE_IMAGES = new HashMap<Character, Image>(){ // Name, Image
+        {
+            put('W', loadImage("extra_files/images/tile_images/WallImage.png"));
+            put('P', loadImage("extra_files/images/tile_images/PathImage.png"));
+            put('S', loadImage("extra_files/images/tile_images/StartImage.png"));
+            put('E', loadImage("extra_files/images/tile_images/EndImage.png"));
+            //put('O', loadImage("extra_files/images/player_icons/OrangeIcon.png"));
         }
     };
 
