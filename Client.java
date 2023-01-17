@@ -126,7 +126,7 @@ public class Client {
                 } catch (Exception e) {}
                 if(update != "" && update != null){
                     updateInfo = update.split(" ", 12);
-                    if(!(updateInfo[0].equals(Const.UPDATE_MAP) || updateInfo[0].equals(Const.DRAW_MAP))){System.out.println(update);}
+                    if(!(updateInfo[0].equals(Const.UPDATE_MAP) || updateInfo[0].equals(Const.DRAW_MAP) || updateInfo[0].equals(Const.PLAYER) || updateInfo[0].equals(Const.ENEMY))){System.out.println(update);}
                     //System.out.println(update);
                     // From server
                     if(updateInfo[0].equals(Const.LOBBY)){
@@ -1142,18 +1142,18 @@ public class Client {
                 this.health = health; 
             }
             public void draw(Graphics graphics, int mainPlayerX, int mainPlayerY){
-                enemyImage.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX), Const.HALF_HEIGHT + (this.y - mainPlayerY));
+                enemyImage.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX) - Const.ENEMY_DIMENSIONS/2, Const.HALF_HEIGHT + (this.y - mainPlayerY) - Const.ENEMY_DIMENSIONS/2);
                 graphics.setColor(Color.RED);
                 graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), 50, 10);
                 graphics.setColor(Color.GREEN);
                 graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), (health / maxHealth) * 50, 10);
             }
             private void rotateImage(){
-                BufferedImage rotatedImage = new BufferedImage(enemyImage.getWidth(), enemyImage.getHeight(), enemyImage.getImage().getType());
+                /*BufferedImage rotatedImage = new BufferedImage(enemyImage.getWidth(), enemyImage.getHeight(), enemyImage.getImage().getType());
                 Graphics2D g2d = rotatedImage.createGraphics();
                 g2d.rotate(this.angle, enemyImage.getWidth()/2, enemyImage.getHeight()/2);
                 g2d.dispose();
-                this.enemyImage.setImage(rotatedImage);
+                this.enemyImage.setImage(rotatedImage);*/
             }
         }
         //act upon key events

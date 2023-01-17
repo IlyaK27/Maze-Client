@@ -89,6 +89,7 @@ public class Const{
     public static final int MAX_ABILITES_PER_ROW = 6;
     public static final int TILE_DIMENSIONS = 150;
     public static final int PLAYER_DIMENSIONS = 110;
+    public static final int ENEMY_DIMENSIONS = 120;
 
     // Commands (See shared doc for more info)
     public static final String PING = "PING"; // Making sure client is still connected
@@ -155,6 +156,7 @@ public class Const{
     //private static final Image SELF_HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SelfHealDescription.png");
     //private static final Image INVISIBILTY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvisbilityDescription.png");
 
+    public static final Image ENEMY_IMAGE = loadImage("extra_files/images/Enemy.png");
     // Player images, Icons are for lobby and images are for actual in game and have different directions, they are also a bit larger too.
     public static final HashMap<String, Image> PLAYER_ICONS = new HashMap<String, Image>(){ // Name, Image
         {
