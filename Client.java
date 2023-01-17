@@ -126,7 +126,7 @@ public class Client {
                 } catch (Exception e) {}
                 if(update != "" && update != null){
                     updateInfo = update.split(" ", 12);
-                    if(!(updateInfo[0].equals(Const.UPDATE_MAP) || updateInfo[0].equals(Const.DRAW_MAP) || updateInfo[0].equals(Const.PLAYER) || updateInfo[0].equals(Const.ENEMY))){System.out.println(update);}
+                    if(!(updateInfo[0].equals(Const.UPDATE_MAP) || updateInfo[0].equals(Const.PLAYER) || updateInfo[0].equals(Const.DRAW_MAP)  || updateInfo[0].equals(Const.ENEMY))){System.out.println(update);}
                     //System.out.println(update);
                     // From server
                     if(updateInfo[0].equals(Const.LOBBY)){
@@ -1018,10 +1018,12 @@ public class Client {
             }
         }
         public void updateEnemy(int x, int y, int enemyID, int angle, int health){
-            Enemy enemy = enemies.get(enemyID);
-            enemy.setCoords(x,y);
-            enemy.setAngle(angle);
-            enemy.setHealth(health);
+            if(enemies.size() >= enemyID){
+                Enemy enemy = enemies.get(enemyID);
+                enemy.setCoords(x,y);
+                enemy.setAngle(angle);
+                enemy.setHealth(health);
+            }
         }
         public void revivePlayer(String playerName){
 
