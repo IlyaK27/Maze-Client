@@ -42,6 +42,12 @@
     public String getPicName(){
         return this.picName;
     }
+    public BufferedImage getImage(){
+        return this.picture;
+    }
+    public void setImage(BufferedImage picture){
+        this.picture = picture;
+    }
     public void draw(Graphics g, int x, int y) {
         g.drawImage(this.picture, x, y, null);
     }

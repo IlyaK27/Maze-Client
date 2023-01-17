@@ -1,5 +1,6 @@
 import java.util.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
@@ -39,9 +40,6 @@ public class Client {
     private final int PORT = 5001;
     protected static boolean playing;
     private String lobbyName;
-    
-    private int mouseX;
-    private int mouseY;
 
     public static void main(String[] args) throws IOException{
         Client client = new Client();
@@ -56,14 +54,6 @@ public class Client {
                 System.out.println("wee");
             }   
         }
-    }
-    //-------------------------------------------------
-    public class MyMouseMotionListener implements MouseMotionListener{   
-        public void mouseMoved(MouseEvent  e){
-            mouseX = e.getX();
-            mouseY = e.getY();
-        }
-        public void mouseDragged(MouseEvent  e){}
     }
     //-------------------------------------------------
     private void setup() throws IOException{
@@ -234,6 +224,24 @@ public class Client {
                         int health = Integer.parseInt(updateInfo[5]);
                         gameScreen.updatePlayer(playerName, playerX, playerY, direction, health);
                     }
+                    else if(updateInfo[0].equals(Const.NEWE)){
+                        int enemyX = Integer.parseInt(updateInfo[1]);
+                        int enemyY = Integer.parseInt(updateInfo[2]);
+                        int health = Integer.parseInt(updateInfo[3]);
+                        gameScreen.addEnemy(enemyX, enemyY, health);
+                    }
+                    else if(updateInfo[0].equals(Const.ENEMY)){
+                        int enemyID = Integer.parseInt(updateInfo[1]);
+                        int enemyX = Integer.parseInt(updateInfo[2]);
+                        int enemyY = Integer.parseInt(updateInfo[3]);
+                        int angle = Integer.parseInt(updateInfo[4]);
+                        int health = Integer.parseInt(updateInfo[5]);
+                        gameScreen.updateEnemy(enemyX, enemyY, enemyID, angle, health);
+                    }
+                    else if(updateInfo[0].equals(Const.KILLEDE)){
+                        int enemyID = Integer.parseInt(updateInfo[1]);
+                        gameScreen.removeEnemy(enemyID);
+                    }
                     else if(updateInfo[0].equals(Const.UPDATE_MAP)){
                         int rowNum = Integer.parseInt(updateInfo[1]);
                         char[] row = new char[updateInfo.length - 2];
@@ -252,7 +260,6 @@ public class Client {
                         int mapX = Integer.parseInt(updateInfo[3]) * Const.TILE_DIMENSIONS;
                         int mapY = Integer.parseInt(updateInfo[4]) * Const.TILE_DIMENSIONS;
                         gameScreen.updateFOV(); 
-                        window.repaint();
                         gameScreen.newFOVDimensions(rowCount, colCount, mapX, mapY);
                     }
                     else if(updateInfo[0].equals(Const.WIN)){
@@ -957,15 +964,12 @@ public class Client {
             abilityImages.replace(ultimate, Const.ULTIMATE_IMAGES.get(ultimateName));
         }
         private void drawMap(Graphics graphics){
-            //System.out.println("currentFov" + currentFov.length + " " + currentFov[0].length);
             if(currentFov != null){
                 for(int y = 0; y < currentFov.length; y++){
                     for(int x = 0; x < currentFov[y].length; x++){
                         Image tileImage = Const.TILE_IMAGES.get(currentFov[y][x]);
-                        tileImage.draw(graphics, Const.HALF_WIDTH + mapX + (x * Const.TILE_DIMENSIONS) - currentPlayer.getX() - Const.PLAYER_DIMENSIONS/2, Const.HALF_HEIGHT + mapY + (y * Const.TILE_DIMENSIONS) - currentPlayer.getY() - Const.PLAYER_DIMENSIONS/2);
-                        //tileImage.draw(graphics, Const.HALF_WIDTH + (x * Const.TILE_DIMENSIONS) - currentPlayer.getX() - Const.PLAYER_DIMENSIONS/2, Const.HALF_HEIGHT + (y * Const.TILE_DIMENSIONS) - currentPlayer.getY() - Const.PLAYER_DIMENSIONS/2);
-                        //graphics, Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0] - Const.PLAYER_DIMENSIONS/2, Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2
-                        //Const.TILE_IMAGES.get(currentFov[y][x]).draw(graphics, Const.HALF_WIDTH + (mapX + (x * Const.TILE_DIMENSIONS) - currentPlayer.getX()), Const.HALF_HEIGHT + (mapY + (y * Const.TILE_DIMENSIONS) - currentPlayer.getY()));
+                        tileImage.draw(graphics, Const.HALF_WIDTH + mapX + (x * Const.TILE_DIMENSIONS) - currentPlayer.getX() - Const.PLAYER_DIMENSIONS/2, 
+                            Const.HALF_HEIGHT + mapY + (y * Const.TILE_DIMENSIONS) - currentPlayer.getY() - Const.PLAYER_DIMENSIONS/2);
                     }
                 }
             }
@@ -993,9 +997,10 @@ public class Client {
         }
         public void updateFOV(){
             this.currentFov = this.newFov;
+            window.repaint();
         }
-        public void addEnemy(int x, int y){
-            Enemy enemy = new Enemy(x, y);
+        public void addEnemy(int x, int y, int health){
+            Enemy enemy = new Enemy(x, y, health);
             enemies.add(enemy);
         }
         public void addPlayer(String playerName, String color, int x, int y){
@@ -1012,10 +1017,11 @@ public class Client {
                 }
             }
         }
-        public void updateEnemy(int x, int y, int enemyID, int angle){
+        public void updateEnemy(int x, int y, int enemyID, int angle, int health){
             Enemy enemy = enemies.get(enemyID);
             enemy.setCoords(x,y);
             enemy.setAngle(angle);
+            enemy.setHealth(health);
         }
         public void revivePlayer(String playerName){
 
@@ -1099,8 +1105,6 @@ public class Client {
                 this.y = centerY;
             }
             public void draw(Graphics graphics, int mainPlayerX, int mainPlayerY){
-                //System.out.println("Drawing playerx-" + (Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0]));
-                //System.out.println("Drawing playery-" + (Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1]));
                 playerImages[this.direction].draw(graphics, 
                     Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0] - Const.PLAYER_DIMENSIONS/2, 
                     Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2);
@@ -1116,11 +1120,15 @@ public class Client {
             private Image enemyImage;
             private int x;
             private int y;
-            Enemy(int x, int y){
+            private int health;
+            private int maxHealth;
+            Enemy(int x, int y, int health){
                 this.angle = 0;
-                //this.playerImage = Const.
+                this.enemyImage = Const.ENEMY_IMAGE;
                 this.x = x;
                 this.y = y;
+                this.health = health;
+                this.maxHealth = health;
             }   
             public void setCoords(int x, int y){
                 this.x = x;
@@ -1128,9 +1136,24 @@ public class Client {
             }
             public void setAngle(int angle){
                 this.angle = angle; // Using if statement just in case
+                rotateImage();
+            }
+            public void setHealth(int health){
+                this.health = health; 
             }
             public void draw(Graphics graphics, int mainPlayerX, int mainPlayerY){
                 enemyImage.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX), Const.HALF_HEIGHT + (this.y - mainPlayerY));
+                graphics.setColor(Color.RED);
+                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), 50, 10);
+                graphics.setColor(Color.GREEN);
+                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), (health / maxHealth) * 50, 10);
+            }
+            private void rotateImage(){
+                BufferedImage rotatedImage = new BufferedImage(enemyImage.getWidth(), enemyImage.getHeight(), enemyImage.getImage().getType());
+                Graphics2D g2d = rotatedImage.createGraphics();
+                g2d.rotate(this.angle, enemyImage.getWidth()/2, enemyImage.getHeight()/2);
+                g2d.dispose();
+                this.enemyImage.setImage(rotatedImage);
             }
         }
         //act upon key events
