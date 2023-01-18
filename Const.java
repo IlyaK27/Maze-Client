@@ -129,6 +129,9 @@ public class Const{
     public static final String REMOVEP = "REMOVEP"; // Player has left lobby, remove them from the player list
     public static final String NEWE = "NEWE"; // New enemy has spawned 
     public static final String PLAYER = "PLAYER"; // Updates the correspondings players information for the client
+    public static final String DOWNED = "DOWNED"; // Tells the client the specified player has been put into the downed state
+    public static final String REVIVED = "REVIVED"; // Tells the client the specified player has been revived
+    public static final String DIED = "DIED"; // Tells the client the specified player has died
     public static final String ENEMY = "ENEMY"; // Updates the correspondings enemies information for the client
     public static final String KILLEDE = "KILLEDE"; // Tells the client this enemy has died and to remove it from the enemy list 
     public static final String DIE = "DIE"; // Client has died
@@ -177,6 +180,22 @@ public class Const{
             put("GREEN", GREEN_IMAGES);
             put("YELLOW", YELLOW_IMAGES);
             put("ORANGE", ORANGE_IMAGES);
+        }
+    };
+    public static final HashMap<Integer, Image> DOWNED_PLAYER_IMAGES = new HashMap<Integer, Image>(){ // Name, Image
+        {
+            put(0, loadImage("extra_files/images/player/DownedPlayer0.png"));
+            put(1, loadImage("extra_files/images/player/DownedPlayer1.png"));
+            put(2, loadImage("extra_files/images/player/DownedPlayer2.png"));
+            put(3, loadImage("extra_files/images/player/DownedPlayer3.png"));
+        }
+    };
+    public static final HashMap<Integer, Image> DEAD_PLAYER_IMAGES = new HashMap<Integer, Image>(){ // Name, Image
+        {
+            put(0, loadImage("extra_files/images/player/DeadPlayer0.png"));
+            put(1, loadImage("extra_files/images/player/DeadPlayer1.png"));
+            put(2, loadImage("extra_files/images/player/DeadPlayer2.png"));
+            put(3, loadImage("extra_files/images/player/DeadPlayer3.png"));
         }
     };
     private static final Integer[] HORIZONTAL_CORRECTION = {- 30, 0};

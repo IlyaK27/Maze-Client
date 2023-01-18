@@ -1,6 +1,5 @@
 import java.util.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
@@ -20,7 +19,7 @@ public class Client {
     private GamePanel gameScreen;
     private JPanel pauseScreen;
     private JPanel howToPlayScreen;
-    private JPanel gameOverScreen;
+    private GameOverPanel gameOverScreen;
 
     public final static String MENU_PANEL = "main menu screen";
     public final static String LOBBY_SELECT_PANEL = "lobby select screen";
@@ -39,6 +38,7 @@ public class Client {
     private final String HOST = "localhost";
     private final int PORT = 5001;
     protected static boolean playing;
+    private boolean lost;
     private String lobbyName;
 
     public static void main(String[] args) throws IOException{
@@ -79,7 +79,7 @@ public class Client {
          //this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
          //this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
          //this.pauseScreen = new PauseScreenPanel(Const.MENU_BACKGROUND);
-         //this.gameOverScreen = new GameOverScreenPanel(Const.MENU_BACKGROUND);
+         this.gameOverScreen = new GameOverPanel(Const.WALL_BACKGROUND);
  
          // Add the screens to the window manager.
          cards.add(menuScreen, MENU_PANEL);
@@ -89,15 +89,14 @@ public class Client {
          cards.add(gameScreen, GAME_PANEL);
          cards.add(pauseScreen, PAUSE_PANEL);
          //cards.add(howToPlayScreen, HOW_TO_PLAY_PANEL);
-         /*cards.add(createLobbyScreen, CREATE_LOBBY_PANEL);
          cards.add(gameOverScreen, GAME_OVER_PANEL);
-         cards.add(pauseScreen, PAUSE_PANEL);*/
  
          window.add(cards);
          window.setVisible(true);
          window.setResizable(false);
          window.pack();
         playing = false;
+        lost = false;
         lobbyName = "";
         window.setVisible(true);
     }
@@ -167,11 +166,15 @@ public class Client {
                         }
                     }
                     else if(updateInfo[0].equals(Const.LEAVE)){ // This command is given after the player wants to leave a lobby
-                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
-                        swapper.swap();
-                        abilitySelectScreen.resetButtons();
-                        lobbyScreen.clearBanners();
-                        gameScreen.clearGame();
+                        if(!(lost)){
+                            Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
+                            swapper.swap();
+                            abilitySelectScreen.resetButtons();
+                            lobbyScreen.clearBanners();
+                            gameScreen.clearGame();
+                        }else{
+                            lost = false;
+                        }
                     }
                     else if(updateInfo[0].equals(Const.REMOVEP)){ // This command is given when a new player joins the lobby
                         String playerName = updateInfo[1]; 
@@ -262,15 +265,35 @@ public class Client {
                         gameScreen.updateFOV(); 
                         gameScreen.newFOVDimensions(rowCount, colCount, mapX, mapY);
                     }
+                    else if(updateInfo[0].equals(Const.DIED)){
+                        String playerName = updateInfo[1];
+                        gameScreen.killPlayer(playerName);
+                    }
+                    else if(updateInfo[0].equals(Const.DOWNED)){
+                        String playerName = updateInfo[1];
+                        gameScreen.downPlayer(playerName);
+                    }
+                    else if(updateInfo[0].equals(Const.REVIVED)){
+                        String playerName = updateInfo[1];
+                        gameScreen.revivePlayer(playerName);
+                    }
+                    else if(updateInfo[0].equals(Const.DIE)){
+                        gameScreen.die();
+                    }
                     else if(updateInfo[0].equals(Const.WIN)){
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
                         swapper.swap();
                         gameScreen.resetGame();
                     }
                     else if(updateInfo[0].equals(Const.LOSE)){
-                        //Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
-                        //swapper.swap();
-                        gameScreen.resetGame();
+                        String rounds = updateInfo[1];
+                        lost = true;
+                        gameOverScreen.updateRounds(rounds);
+                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, GAME_OVER_PANEL);
+                        swapper.swap();
+                        abilitySelectScreen.resetButtons();
+                        lobbyScreen.clearBanners();
+                        gameScreen.clearGame();
                     }
                     /* From lobby
                     else if(updateInfo[0].equals(Const.JOIN)){
@@ -351,7 +374,6 @@ public class Client {
             layout.show(this.cards, this.nextPanel);
         }
     }
-
     public class MenuPanel extends ScreenPanel {
         private ServerButton playButton;
         private TextButton howToPlayButton;
@@ -1026,12 +1048,32 @@ public class Client {
             }
         }
         public void revivePlayer(String playerName){
-
-        }
+            for(Player player: players){
+                if(playerName.equals(player.name())){
+                    player.alive = true;
+                    player.downed = false;
+                    break;
+                }
+            }
+        }   
         public void downPlayer(String playerName){
-
+            for(Player player: players){
+                if(playerName.equals(player.name())){
+                    player.downed = true;
+                    player.health = 0;
+                    break;
+                }
+            }
         }
-        public void killPlayer(){
+        public void killPlayer(String playerName){
+            for(Player player: players){
+                if(playerName.equals(player.name())){
+                    player.alive = false;
+                    break;
+                }
+            }
+        }
+        public void die(){
 
         }
         public void removePlayer(String playerName){
@@ -1087,14 +1129,17 @@ public class Client {
             public String name(){
                 return this.name.getText();
             }
-            public String color(){
-                return this.color();
-            }
             public int getX(){
                 return this.x;
             }
             public int getY(){
                 return this.y;
+            }
+            public boolean alive(){
+                return this.alive;
+            }
+            public boolean downed(){
+                return this.downed;
             }
             public void setDirection(int direction){
                 if(direction >= 0 && direction <= 3){this.direction = direction;} // Using if statement just in case
@@ -1107,14 +1152,26 @@ public class Client {
                 this.y = centerY;
             }
             public void draw(Graphics graphics, int mainPlayerX, int mainPlayerY){
-                playerImages[this.direction].draw(graphics, 
-                    Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0] - Const.PLAYER_DIMENSIONS/2, 
-                    Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2);
+                if(alive && !(downed)){
+                    playerImages[this.direction].draw(graphics, 
+                        Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0] - Const.PLAYER_DIMENSIONS/2, 
+                        Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2);
+                }else if(!(alive)){
+                    Const.DEAD_PLAYER_IMAGES.get(direction).draw(graphics, 
+                        Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0] - Const.PLAYER_DIMENSIONS/2, 
+                        Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2);
+                }else if(downed){
+                    Const.DOWNED_PLAYER_IMAGES.get(direction).draw(graphics, 
+                        Const.HALF_WIDTH + (this.x - mainPlayerX) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[0] - Const.PLAYER_DIMENSIONS/2, 
+                        Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2);
+                }
                 this.name.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX), Const.HALF_HEIGHT + (this.y - mainPlayerY) - 20);
-                graphics.setColor(Color.RED);
-                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), 50, 10);
-                graphics.setColor(Color.GREEN);
-                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), health / 2, 10);
+                if(alive){
+                    graphics.setColor(Color.RED);
+                    graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), 50, 10);
+                    graphics.setColor(Color.GREEN);
+                    graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), health / 2, 10);
+                }
             }
         }
         private class Enemy{
@@ -1144,11 +1201,11 @@ public class Client {
                 this.health = health; 
             }
             public void draw(Graphics graphics, int mainPlayerX, int mainPlayerY){
-                enemyImage.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX) - Const.ENEMY_DIMENSIONS/2, Const.HALF_HEIGHT + (this.y - mainPlayerY) - Const.ENEMY_DIMENSIONS/2);
+                enemyImage.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX) - Const.PLAYER_DIMENSIONS/2, Const.HALF_HEIGHT + (this.y - mainPlayerY) - Const.PLAYER_DIMENSIONS/2);
                 graphics.setColor(Color.RED);
-                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), 50, 10);
+                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 20, Const.HALF_HEIGHT + 8 + (this.y - mainPlayerY), 50, 10);
                 graphics.setColor(Color.GREEN);
-                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), (health / maxHealth) * 50, 10);
+                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 20, Const.HALF_HEIGHT + 8 + (this.y - mainPlayerY), (health / maxHealth) * 50, 10);
             }
             private void rotateImage(){
                 /*BufferedImage rotatedImage = new BufferedImage(enemyImage.getWidth(), enemyImage.getHeight(), enemyImage.getImage().getType());
@@ -1239,5 +1296,42 @@ public class Client {
             public void keyTyped(KeyEvent e){
             }           
         }
+    }
+    public class GameOverPanel extends ScreenPanel {
+        private Text roundsText;
+        private TextButton mainMenuButton;
+
+        public GameOverPanel(Image backgroundSprite) {
+            super(backgroundSprite);
+            // Initialize the buttons.
+            this.roundsText = new Text("", Const.TEXT_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 500);
+            Text menuButtonText = new Text("Main Menu", Const.MENU_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 700);
+            this.mainMenuButton = new ServerButton(window, output, menuButtonText, Const.LOBBIES_LIST, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 700, Const.RADIUS);
+            
+            
+            
+            
+            // Add the listeners for the screens.
+            this.addMouseListener(mainMenuButton.new BasicMouseListener());
+            this.addMouseMotionListener(mainMenuButton.new InsideButtonMotionListener());
+
+            this.setFocusable(true);
+            this.addComponentListener(this.FOCUS_WHEN_SHOWN);
+        }
+        public void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            this.roundsText.draw(graphics);
+            this.mainMenuButton.draw(graphics);
+        }
+        public void updateRounds(String rounds){
+            String roundsLasted = "You survived " + rounds + " rounds!";
+            this.roundsText.setText(roundsLasted);
+        }
+        public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
+            public void componentShown(ComponentEvent event){
+                requestFocusInWindow();
+            }
+        };
     }
 }

@@ -51,11 +51,12 @@
         this.centerX = centerX;
         this.x = centerX - this.width/2;
     }
-     public void setText(String newText){
-         this.text = newText;
-         this.width = this.getTextWidth(); 
-         this.x = (this.centerX - (this.width / 2));
-     }
+    public void setText(String newText){
+        System.out.println("Text-" + newText);
+        this.text = newText;
+        this.width = this.getTextWidth(); 
+        this.x = (this.centerX - (this.width / 2));
+    }
  //------------------------------------------------------------------------------
  // Methods
     // Using AffineTransform and FontRenderContext to get the dimensions of the font
