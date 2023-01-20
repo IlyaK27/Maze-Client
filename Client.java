@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -237,9 +238,8 @@ public class Client {
                         int enemyID = Integer.parseInt(updateInfo[1]);
                         int enemyX = Integer.parseInt(updateInfo[2]);
                         int enemyY = Integer.parseInt(updateInfo[3]);
-                        int angle = Integer.parseInt(updateInfo[4]);
-                        int health = Integer.parseInt(updateInfo[5]);
-                        gameScreen.updateEnemy(enemyX, enemyY, enemyID, angle, health);
+                        int health = Integer.parseInt(updateInfo[4]);
+                        gameScreen.updateEnemy(enemyX, enemyY, enemyID, health);
                     }
                     else if(updateInfo[0].equals(Const.KILLEDE)){
                         int enemyID = Integer.parseInt(updateInfo[1]);
@@ -946,6 +946,7 @@ public class Client {
             // Add the listeners for the screens.
 
             this.addKeyListener(new GameKeyListener());
+            this.addMouseListener(new GameMouseListener());
 
             this.setFocusable(true);
             this.addComponentListener(this.FOCUS_WHEN_SHOWN);
@@ -1005,7 +1006,10 @@ public class Client {
         }
         private void drawEnemies(Graphics graphics){
             for(Enemy enemy: enemies){
-                enemy.draw(graphics, currentPlayer.getX(), currentPlayer.getY());
+                // Drawing enemies within fov
+                if(Math.sqrt(Math.pow(currentPlayer.getX() - enemy.getX(),2) + Math.pow(currentPlayer.getY() - enemy.getY(),2)) <= Const.HALF_WIDTH + Const.ENEMY_DIMENSIONS + Const.PLAYER_DIMENSIONS){
+                    enemy.draw(graphics, currentPlayer.getX(), currentPlayer.getY());
+                }
             }
         }
         public void newFOVDimensions(int rows, int cols, int mapX, int mapY){
@@ -1039,11 +1043,10 @@ public class Client {
                 }
             }
         }
-        public void updateEnemy(int x, int y, int enemyID, int angle, int health){
+        public void updateEnemy(int x, int y, int enemyID, int health){
             if(enemies.size() >= enemyID){
                 Enemy enemy = enemies.get(enemyID);
                 enemy.setCoords(x,y);
-                enemy.setAngle(angle);
                 enemy.setHealth(health);
             }
         }
@@ -1074,7 +1077,7 @@ public class Client {
             }
         }
         public void die(){
-
+            this.alive = false;
         }
         public void removePlayer(String playerName){
             for(Player player: players){
@@ -1175,27 +1178,27 @@ public class Client {
             }
         }
         private class Enemy{
-            private int angle; 
             private Image enemyImage;
             private int x;
             private int y;
             private int health;
             private int maxHealth;
             Enemy(int x, int y, int health){
-                this.angle = 0;
                 this.enemyImage = Const.ENEMY_IMAGE;
                 this.x = x;
                 this.y = y;
                 this.health = health;
                 this.maxHealth = health;
             }   
+            public int getX(){
+                return this.x;
+            }
+            public int getY(){
+                return this.y;
+            }
             public void setCoords(int x, int y){
                 this.x = x;
                 this.y = y;
-            }
-            public void setAngle(int angle){
-                this.angle = angle; // Using if statement just in case
-                rotateImage();
             }
             public void setHealth(int health){
                 this.health = health; 
@@ -1205,21 +1208,18 @@ public class Client {
                 graphics.setColor(Color.RED);
                 graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 20, Const.HALF_HEIGHT + 8 + (this.y - mainPlayerY), 50, 10);
                 graphics.setColor(Color.GREEN);
-                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 20, Const.HALF_HEIGHT + 8 + (this.y - mainPlayerY), (health / maxHealth) * 50, 10);
-            }
-            private void rotateImage(){
-                /*BufferedImage rotatedImage = new BufferedImage(enemyImage.getWidth(), enemyImage.getHeight(), enemyImage.getImage().getType());
-                Graphics2D g2d = rotatedImage.createGraphics();
-                g2d.rotate(this.angle, enemyImage.getWidth()/2, enemyImage.getHeight()/2);
-                g2d.dispose();
-                this.enemyImage.setImage(rotatedImage);*/
+                graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 20, Const.HALF_HEIGHT + 8 + (this.y - mainPlayerY), (int)(((double)health / maxHealth) * 50), 10);
             }
         }
         //act upon key events
         public class GameKeyListener implements KeyListener{   
             public void keyPressed(KeyEvent e){
                 int key = e.getKeyCode();
-                if (alive){
+                if(key == KeyEvent.VK_ESCAPE){
+                    Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, PAUSE_PANEL);
+                    swapper.swap();
+                }
+                else if (alive){
                     if (key == KeyEvent.VK_W){
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         writer.print(Const.MOVE + " 0");
@@ -1233,17 +1233,43 @@ public class Client {
                     else if(key == KeyEvent.VK_A){
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         writer.print(Const.MOVE + " 3");
-                    }else if(key == KeyEvent.VK_ESCAPE){
-                        Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, PAUSE_PANEL);
-                        swapper.swap();
+                    }
+                }else{ // Once the player is dead they can click the left and right arrow keys to spectate other players
+                    if(players.size() > 1){
+                        if (key == KeyEvent.VK_LEFT){
+                            int currentIndex = players.indexOf(currentPlayer);
+                            currentIndex--;
+                            if(currentIndex == -1){
+                                currentIndex = players.size() - 1;
+                            }
+                            currentPlayer = players.get(currentIndex);
+                            Client.ServerWriter writer = new Client.ServerWriter(output);
+                            writer.print(Const.SPECTATE + " " + currentPlayer.name());
+                        }else if(key == KeyEvent.VK_RIGHT){
+                            int currentIndex = players.indexOf(currentPlayer);
+                            currentIndex++;
+                            if(currentIndex == players.size()){
+                                currentIndex = 0;
+                            }
+                            currentPlayer = players.get(currentIndex);
+                            Client.ServerWriter writer = new Client.ServerWriter(output);
+                            writer.print(Const.SPECTATE + " " + currentPlayer.name());
+                        }    
                     }
                 }
             }
-            public void keyReleased(KeyEvent e){ 
-                int key = e.getKeyCode();
-            }   
-            public void keyTyped(KeyEvent e){
-            }           
+            public void keyReleased(KeyEvent e){ }   
+            public void keyTyped(KeyEvent e){}           
+        }
+        public class GameMouseListener implements MouseListener{
+            public void mouseClicked(MouseEvent event) {
+                Client.ServerWriter writer = new Client.ServerWriter(output);
+                writer.print(Const.ATTACK);
+            }
+            public void mousePressed(MouseEvent e) {}   
+            public void mouseReleased(MouseEvent e) {} 
+            public void mouseEntered(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {}
         }
     }
     public class PausePanel extends ScreenPanel {
@@ -1300,17 +1326,13 @@ public class Client {
     public class GameOverPanel extends ScreenPanel {
         private Text roundsText;
         private TextButton mainMenuButton;
-
         public GameOverPanel(Image backgroundSprite) {
             super(backgroundSprite);
             // Initialize the buttons.
             this.roundsText = new Text("", Const.TEXT_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 500);
             Text menuButtonText = new Text("Main Menu", Const.MENU_BUTTON_FONT, Const.LARGE_BUTTON_FONT_COLOR, Const.HALF_WIDTH, 700);
-            this.mainMenuButton = new ServerButton(window, output, menuButtonText, Const.LOBBIES_LIST, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 700, Const.RADIUS);
-            
-            
-            
+            this.mainMenuButton = new TextButton(window, cards, MENU_PANEL, menuButtonText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
+                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 700, Const.RADIUS);         
             
             // Add the listeners for the screens.
             this.addMouseListener(mainMenuButton.new BasicMouseListener());
@@ -1325,7 +1347,10 @@ public class Client {
             this.mainMenuButton.draw(graphics);
         }
         public void updateRounds(String rounds){
-            String roundsLasted = "You survived " + rounds + " rounds!";
+            String roundsLasted = "You survived " + rounds + " round";
+            // Changing the ending based on the rounds won (plural vs non plural)
+            if(rounds.equals("1")){roundsLasted = roundsLasted + "!";}
+            else{roundsLasted = roundsLasted + "s!";}
             this.roundsText.setText(roundsLasted);
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){

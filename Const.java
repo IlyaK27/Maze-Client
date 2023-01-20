@@ -111,6 +111,7 @@ public class Const{
     public static final String ABILITY2 = "ABILITY2"; // Client used second ability
     public static final String ULTIMATE = "ULTIMATE"; // Client used ultimate ability
     public static final String DRAWN = "DRAWN"; // Client has drawn their map so send new map update
+    public static final String SPECTATE = "SPECTATE"; // Client tells server the want to spectate the provided player
     public static final String LEAVE = "LEAVE"; // Client left lobby
 
     // Server to Client commands
