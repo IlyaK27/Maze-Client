@@ -1,16 +1,21 @@
+/**
+ * Final Game Client Class
+ * @Author Ilya Kononov
+ * @Date = January 22 2023
+ * This is the main file of the client and where the game actually happens
+ */
+
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
-import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
 public class Client {
     private static JFrame window;
     private JPanel cards;
-    //private static MyPanel gamePanel;
 
     // The different screens.
     private MenuPanel menuScreen;
@@ -70,32 +75,32 @@ public class Client {
         input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         server = new ServerHandler(this);
 
-         //Initialize the screens.
-         this.menuScreen = new MenuPanel(Const.MENU_BACKGROUND);
-         this.lobbySelectScreen = new LobbySelectPanel(Const.WALL_BACKGROUND);
-         this.abilitySelectScreen = new AbilitySelectPanel(Const.ABILITY_SELECT_BACKGROUND);
-         this.lobbyScreen = new LobbyPanel(Const.WALL_BACKGROUND);
-         this.gameScreen = new GamePanel(Const.BLANK_BACKGROUND);
-         this.pauseScreen = new PausePanel(Const.WALL_BACKGROUND);
-         //this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
-         //this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
-         //this.pauseScreen = new PauseScreenPanel(Const.MENU_BACKGROUND);
-         this.gameOverScreen = new GameOverPanel(Const.WALL_BACKGROUND);
+        //Initialize the screens.
+        this.menuScreen = new MenuPanel(Const.MENU_BACKGROUND);
+        this.lobbySelectScreen = new LobbySelectPanel(Const.WALL_BACKGROUND);
+        this.abilitySelectScreen = new AbilitySelectPanel(Const.ABILITY_SELECT_BACKGROUND);
+        this.lobbyScreen = new LobbyPanel(Const.WALL_BACKGROUND);
+        this.gameScreen = new GamePanel(Const.BLANK_BACKGROUND);
+        this.pauseScreen = new PausePanel(Const.WALL_BACKGROUND);
+        //this.howToPlayScreen = new HowToPlayScreenPanel(Const.MENU_BACKGROUND);
+        //this.lobbyScreen = new LobbyScreenPanel(Const.MENU_BACKGROUND);
+        //this.pauseScreen = new PauseScreenPanel(Const.MENU_BACKGROUND);
+        this.gameOverScreen = new GameOverPanel(Const.WALL_BACKGROUND);
  
-         // Add the screens to the window manager.
-         cards.add(menuScreen, MENU_PANEL);
-         cards.add(lobbySelectScreen, LOBBY_SELECT_PANEL);
-         cards.add(abilitySelectScreen, ABILITY_SELECT_PANEL);
-         cards.add(lobbyScreen, LOBBY_PANEL);
-         cards.add(gameScreen, GAME_PANEL);
-         cards.add(pauseScreen, PAUSE_PANEL);
-         //cards.add(howToPlayScreen, HOW_TO_PLAY_PANEL);
-         cards.add(gameOverScreen, GAME_OVER_PANEL);
+        // Add the screens to the window manager.
+        cards.add(menuScreen, MENU_PANEL);
+        cards.add(lobbySelectScreen, LOBBY_SELECT_PANEL);
+        cards.add(abilitySelectScreen, ABILITY_SELECT_PANEL);
+        cards.add(lobbyScreen, LOBBY_PANEL);
+        cards.add(gameScreen, GAME_PANEL);
+        cards.add(pauseScreen, PAUSE_PANEL);
+        //cards.add(howToPlayScreen, HOW_TO_PLAY_PANEL);
+        cards.add(gameOverScreen, GAME_OVER_PANEL);
  
-         window.add(cards);
-         window.setVisible(true);
-         window.setResizable(false);
-         window.pack();
+        window.add(cards);
+        window.setVisible(true);
+        window.setResizable(false);
+        window.pack();
         playing = false;
         lost = false;
         lobbyName = "";
@@ -106,7 +111,6 @@ public class Client {
         output.close();
         clientSocket.close();
     }
-    
     class ServerHandler extends Thread{
         private Client client;
         private Pinger pinger;
@@ -120,7 +124,7 @@ public class Client {
         public void run(){
             while(true){
                 String update = "";
-                String[] updateInfo = new String[8];
+                String[] updateInfo = new String[12];
                 try {
                     update = input.readLine();
                 } catch (Exception e) {}
@@ -129,20 +133,20 @@ public class Client {
                     if(!(updateInfo[0].equals(Const.UPDATE_MAP) || updateInfo[0].equals(Const.PLAYER) || updateInfo[0].equals(Const.DRAW_MAP)  || updateInfo[0].equals(Const.ENEMY))){System.out.println(update);}
                     //System.out.println(update);
                     // From server
-                    if(updateInfo[0].equals(Const.LOBBY)){
+                    if(updateInfo[0].equals(Const.LOBBY)){ // LOBBY lobbyName lobbySize
                         String lobbyName = updateInfo[1] + " Lobby";
-                        String lobbyCount = "Players = " + updateInfo[2] + "/4";
-                        lobbySelectScreen.newLobbyBanner(lobbyName, lobbyCount, Const.LOBBY_BANNER_START_Y + lobbySelectScreen.lobbies().size() * Const.SPACE_BETWEEN_LOBBIES);      
+                        String lobbySize = "Players = " + updateInfo[2] + "/4";
+                        lobbySelectScreen.newLobbyBanner(lobbyName, lobbySize, Const.LOBBY_BANNER_START_Y + lobbySelectScreen.lobbies().size() * Const.SPACE_BETWEEN_LOBBIES);      
                     }
-                    else if(updateInfo[0].equals(Const.LOBBY_SELECT)){
+                    else if(updateInfo[0].equals(Const.LOBBY_SELECT)){ // LOBBY_SELECT
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_SELECT_PANEL);
                         swapper.swap();
                     }
-                    else if(updateInfo[0].equals(Const.CLEAR_LOBBIES)){
+                    else if(updateInfo[0].equals(Const.CLEAR_LOBBIES)){ // CLEAR_LOBBIES
                         this.client.lobbySelectScreen.lobbies.clear();
                     }
 
-                    else if(updateInfo[0].equals(Const.NAME)){
+                    else if(updateInfo[0].equals(Const.NAME)){ // NAME newlobby/joinlobby, lobbyName 
                         String secondaryCommand = updateInfo[1];
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         if(secondaryCommand.equals(Const.NEW_LOBBY)){
@@ -152,11 +156,11 @@ public class Client {
                             writer.print(Const.NAME + " " + lobbyName + " " + this.client.lobbySelectScreen.name());
                         }
                     }
-                    else if(updateInfo[0].equals(Const.JOINED)){
+                    else if(updateInfo[0].equals(Const.JOINED)){ // JOINED
                         lobbyName = updateInfo[1];
                     }
                     // From lobby
-                    else if(updateInfo[0].equals(Const.NEW_PLAYER)){ // This command is given when a new player joins the lobby
+                    else if(updateInfo[0].equals(Const.NEW_PLAYER)){ // NEWP playerName playerColor
                         String newPlayerName = updateInfo[1]; 
                         String playerColor = updateInfo[2]; 
                         lobbyScreen.newPlayerBanner(newPlayerName, playerColor);
@@ -166,33 +170,33 @@ public class Client {
                             swapper.swap();
                         }
                     }
-                    else if(updateInfo[0].equals(Const.LEAVE)){ // This command is given after the player wants to leave a lobby
-                        if(!(lost)){
+                    else if(updateInfo[0].equals(Const.LEAVE)){ // LEAVE
+                        abilitySelectScreen.resetButtons();
+                        lobbyScreen.clearBanners();
+                        gameScreen.clearGame();
+                        if(!(lost)){ 
                             Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
                             swapper.swap();
-                            abilitySelectScreen.resetButtons();
-                            lobbyScreen.clearBanners();
-                            gameScreen.clearGame();
-                        }else{
+                        }else{ // Once the game ends all players get sent this command however they don't need to swap screens just yet
                             lost = false;
                         }
                     }
-                    else if(updateInfo[0].equals(Const.REMOVEP)){ // This command is given when a new player joins the lobby
+                    else if(updateInfo[0].equals(Const.REMOVE_PLAYER)){ // REMOVEP playerName
                         String playerName = updateInfo[1]; 
                         lobbyScreen.removePlayerBanner(playerName);
                         gameScreen.removePlayer(playerName);
                     }
-                    else if(updateInfo[0].equals(Const.RESELECT)){ // This command is given when a new player joins the lobby
+                    else if(updateInfo[0].equals(Const.RESELECT)){ // RESELECT playerName
                         String playerName = updateInfo[1]; 
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, ABILITY_SELECT_PANEL);
                         swapper.swap();
                         lobbyScreen.updatePlayerBanner(playerName, false);
                     }
-                    else if(updateInfo[0].equals(Const.MY_ABILITIES)){ // This command is given after the player selected their abilities
+                    else if(updateInfo[0].equals(Const.MY_ABILITIES)){ // MY_ABILITIES
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         writer.print(Const.MY_ABILITIES + " " + abilitySelectScreen.abilities());
                     }
-                    else if(updateInfo[0].equals(Const.ABILITIES)){ // This command is given after the player wants to leave a lobby
+                    else if(updateInfo[0].equals(Const.ABILITIES)){ // ABILITIES playerName ability1Name ability2Name ability3Name
                         String playerName = updateInfo[1];
                         String ability1 = updateInfo[2];
                         String ability2 = updateInfo[3];
@@ -205,22 +209,22 @@ public class Client {
                             swapper.swap();
                         }
                     }
-                    else if(updateInfo[0].equals(Const.READY)){ // This command is given after a player is ready to play
+                    else if(updateInfo[0].equals(Const.READY)){ // READY 
                         String playerName = updateInfo[1];
                         lobbyScreen.updatePlayerBanner(playerName, true);
                     }
-                    else if(updateInfo[0].equals(Const.UNREADY)){ // This command is given after a player is ready to play
+                    else if(updateInfo[0].equals(Const.UNREADY)){ // UNREADY
                         String playerName = updateInfo[1];
                         lobbyScreen.updatePlayerBanner(playerName, false);
                     }
-                    else if(updateInfo[0].equals(Const.GAME_START)){
-                        String myName = updateInfo[1];
+                    else if(updateInfo[0].equals(Const.GAME_START)){ // GAME_START clientsName
+                        String myName = updateInfo[1]; // This is done to set make the player see their players field of view first
                         gameScreen.setCurrentPlayer(myName);
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, GAME_PANEL);
                         swapper.swap();
                         lobbyScreen.resetBanners();
                     }
-                    else if(updateInfo[0].equals(Const.PLAYER)){
+                    else if(updateInfo[0].equals(Const.PLAYER)){ // PLAYER playerName playerX playerY direction currentHealth
                         String playerName = updateInfo[1];
                         int playerX = Integer.parseInt(updateInfo[2]);
                         int playerY = Integer.parseInt(updateInfo[3]);
@@ -228,36 +232,34 @@ public class Client {
                         int health = Integer.parseInt(updateInfo[5]);
                         gameScreen.updatePlayer(playerName, playerX, playerY, direction, health);
                     }
-                    else if(updateInfo[0].equals(Const.NEWE)){
+                    else if(updateInfo[0].equals(Const.NEWE)){ // NEWE enemyX enemyY health
                         int enemyX = Integer.parseInt(updateInfo[1]);
                         int enemyY = Integer.parseInt(updateInfo[2]);
                         int health = Integer.parseInt(updateInfo[3]);
                         gameScreen.addEnemy(enemyX, enemyY, health);
                     }
-                    else if(updateInfo[0].equals(Const.ENEMY)){
+                    else if(updateInfo[0].equals(Const.ENEMY)){ // ENEMY enemyID enemyX enemyY currentHealth
                         int enemyID = Integer.parseInt(updateInfo[1]);
                         int enemyX = Integer.parseInt(updateInfo[2]);
                         int enemyY = Integer.parseInt(updateInfo[3]);
                         int health = Integer.parseInt(updateInfo[4]);
                         gameScreen.updateEnemy(enemyX, enemyY, enemyID, health);
                     }
-                    else if(updateInfo[0].equals(Const.KILLEDE)){
+                    else if(updateInfo[0].equals(Const.KILLEDE)){ // KILLEDE enemyID
                         int enemyID = Integer.parseInt(updateInfo[1]);
                         gameScreen.removeEnemy(enemyID);
                     }
-                    else if(updateInfo[0].equals(Const.UPDATE_MAP)){
+                    else if(updateInfo[0].equals(Const.UPDATE_MAP)){ // UPDATE_MAP rowNum col1 col2 col2...
                         int rowNum = Integer.parseInt(updateInfo[1]);
                         char[] row = new char[updateInfo.length - 2];
                         String msg = "";
                         for(int i = 1; i <= row.length && i < updateInfo.length - 1 && updateInfo[i + 1] != null; i++){ // the row length will always have a maximum of 7 with 1200x1000 screen dimensions (1200 / 150) + 1 =7
                             row[i-1] = updateInfo[i + 1].charAt(0);
                             msg = msg + " " + row[i-1];
-                            //System.out.println("i=" + i + " msg-" + msg);
                         }
-                        //System.out.println("Row - " + msg);
                         gameScreen.modifyFOV(rowNum, row);
                     }
-                    else if(updateInfo[0].equals(Const.DRAW_MAP)){
+                    else if(updateInfo[0].equals(Const.DRAW_MAP)){ // DRAW_MAP rowsInFov colsInFov topLeftTileX topLeftTileY
                         int rowCount = Integer.parseInt(updateInfo[1]);
                         int colCount = Integer.parseInt(updateInfo[2]);
                         int mapX = Integer.parseInt(updateInfo[3]) * Const.TILE_DIMENSIONS;
@@ -265,27 +267,27 @@ public class Client {
                         gameScreen.updateFOV(); 
                         gameScreen.newFOVDimensions(rowCount, colCount, mapX, mapY);
                     }
-                    else if(updateInfo[0].equals(Const.DIED)){
+                    else if(updateInfo[0].equals(Const.DIED)){ // DIED playerName
                         String playerName = updateInfo[1];
                         gameScreen.killPlayer(playerName);
                     }
-                    else if(updateInfo[0].equals(Const.DOWNED)){
+                    else if(updateInfo[0].equals(Const.DOWNED)){ // DOWNED playerName
                         String playerName = updateInfo[1];
                         gameScreen.downPlayer(playerName);
                     }
-                    else if(updateInfo[0].equals(Const.REVIVED)){
+                    else if(updateInfo[0].equals(Const.REVIVED)){ // REVIVED playerName
                         String playerName = updateInfo[1];
                         gameScreen.revivePlayer(playerName);
                     }
-                    else if(updateInfo[0].equals(Const.DIE)){
+                    else if(updateInfo[0].equals(Const.DIE)){ // DIE, this command is saying the clients player died so they can now start spectating players
                         gameScreen.die();
                     }
-                    else if(updateInfo[0].equals(Const.WIN)){
+                    else if(updateInfo[0].equals(Const.WIN)){ // WIN
                         Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
                         swapper.swap();
                         gameScreen.resetGame();
                     }
-                    else if(updateInfo[0].equals(Const.LOSE)){
+                    else if(updateInfo[0].equals(Const.LOSE)){ // LOSE
                         String rounds = updateInfo[1];
                         lost = true;
                         gameOverScreen.updateRounds(rounds);
@@ -295,26 +297,10 @@ public class Client {
                         lobbyScreen.clearBanners();
                         gameScreen.clearGame();
                     }
-                    /* From lobby
-                    else if(updateInfo[0].equals(Const.JOIN)){
-                        
-                    }
-                    else if(updateInfo[0].equals(Const.NEW)){
-                        
-                    }
-                    else if(updateInfo[0].equals(Const.PELLET)){
-                        
-                    }
-                    else if(updateInfo[0].equals(Const.BALL)){
-                        
-                    }
-                    else if(updateInfo[0].equals(Const.REMOVE)){
-                        
-                    }*/
                 }
             }
         }
-        private class Pinger extends Thread{
+        private class Pinger extends Thread{ // This class maintains a connection with the server during the runtime of the program
             PrintWriter output;
             Pinger(PrintWriter output){
                 this.output = output;
@@ -331,8 +317,8 @@ public class Client {
             }
         }
     }
-
-    public static class ServerWriter{
+    // Static class that prints a message in the server. Static class was used so that other classes can also talk to the server when neccesary, see ServerButton for an example
+    public static class ServerWriter{ 
         private PrintWriter output;
         /*
          * Constructs a ServerWriter object with the command to write to the server.
@@ -377,7 +363,6 @@ public class Client {
     public class MenuPanel extends ScreenPanel {
         private ServerButton playButton;
         private TextButton howToPlayButton;
-        //private TextButton creditsButton;
 
         public MenuPanel(Image backgroundSprite) {
             super(backgroundSprite);
@@ -390,18 +375,11 @@ public class Client {
             this.howToPlayButton = new TextButton(window, cards, HOW_TO_PLAY_PANEL, howToPlayButtonText, Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
                                          Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 470, Const.RADIUS);
             
-            
-            /*this.creditsButton = new TextButton(window, cards, CREDITS_PANEL, "Credits", buttonFont, fontColor, 
-                                         Const.LARGE_BUTTON_IN_COLOR, Const.LARGE_BUTTON_BORDER_COLOR, 
-                                         Const.LARGE_BUTTON_HOVER_COLOR, Const.HALF_WIDTH, 770, Const.RADIUS);*/
-            
             // Add the listeners for the screens.
             this.addMouseListener(playButton.new BasicMouseListener());
             this.addMouseMotionListener(playButton.new InsideButtonMotionListener());
             this.addMouseListener(howToPlayButton.new BasicMouseListener());
             this.addMouseMotionListener(howToPlayButton.new InsideButtonMotionListener());
-            //this.addMouseListener(creditsButton.new BasicMouseListener());
-            //this.addMouseMotionListener(creditsButton.new InsideButtonMotionListener());
             this.setFocusable(true);
             this.addComponentListener(this.FOCUS_WHEN_SHOWN);
         }
@@ -409,7 +387,6 @@ public class Client {
             super.paintComponent(graphics);
             this.playButton.draw(graphics);
             this.howToPlayButton.draw(graphics);
-            //this.creditsButton.draw(graphics);
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
             public void componentShown(ComponentEvent event){
@@ -524,7 +501,6 @@ public class Client {
                     else if (key == 8 && playerName.getText().length() > 0){
                         playerName.setText(name.substring(0, (name.length() - 1)));
                     }
-                    //playerName.setText(playerName);
                 }
                 window.repaint();
             }
@@ -565,7 +541,7 @@ public class Client {
             selectedAbilities[0] = ability1Button; selectedAbilities[1] = ability2Button; selectedAbilities[2] = ultimateButton;
             int row = 0;
             int column = 0;
-            for (String abilityName : Const.ABILITY_IMAGES.keySet()) {
+            for (String abilityName : Const.ABILITY_IMAGES.keySet()) { // Adding all of the basic ability buttons
                 if(column == Const.MAX_ABILITES_PER_ROW){
                     column = 0;
                     row++;
@@ -581,8 +557,8 @@ public class Client {
             }
             ultimateBank = new ArrayList<AbilityButton>();
             row = 0;
-            column = 0;
-            for (String ultimateName : Const.ULTIMATE_IMAGES.keySet()) {
+            column = 0; 
+            for (String ultimateName : Const.ULTIMATE_IMAGES.keySet()) { // Adding all of the ultimate ability buttons
                 if(column == Const.MAX_ABILITES_PER_ROW){
                     column = 0;
                     row++;
@@ -627,6 +603,7 @@ public class Client {
             for (AbilityButton button : ultimateBank) {
                 button.draw(graphics);
             }
+            // Only drawing description if an ability is selected
             if(currentAbility != -1 && selectedAbilities[currentAbility].getDescription() != null){selectedAbilities[currentAbility].getDescription().draw(graphics, 851, 273);}
         }
         public final ComponentAdapter FOCUS_WHEN_SHOWN = new ComponentAdapter(){
@@ -785,7 +762,6 @@ public class Client {
         private ServerButton readyButton;
         private ServerButton backButton;
         private ArrayList<PlayerBanner> playerBanners;
-        //private TextButton creditsButton;
 
         public LobbyPanel(Image backgroundSprite) {
             super(backgroundSprite);
@@ -819,6 +795,7 @@ public class Client {
                 playerBanners.get(i).draw(graphics, Const.PLAYER_BANNER_START_X + (Const.PLAYER_BANNER_X_DIFFERENCE * i));
             }
         }
+        // Modifying playerBanners
         public void newPlayerBanner(String playerName, String color) {
             PlayerBanner playerBanner = new PlayerBanner(playerName, color);
             playerBanners.add(playerBanner);
@@ -862,6 +839,7 @@ public class Client {
         public void clearBanners() {
             playerBanners.clear();
         }
+
         public void updateLobbyTitle() {
             this.lobbyTitle.setText(lobbyName + " lobby");
         }
@@ -931,7 +909,7 @@ public class Client {
         private Player currentPlayer; // Player that is currently being spectated
         private int mapX; // X coordinate of top left tile of map that is being drawn on screen
         private int mapY; // Y coordinate of top left tile of map that is being drawn on screen
-        private boolean alive;
+        private boolean alive; // If the clients player is alive
         public GamePanel(Image backgroundSprite) {
             super(backgroundSprite);
             ability1 = Const.ABILITY1_READY; ability2 = Const.ABILITY2_READY; ultimate = Const.ULTIMATE_READY;
@@ -957,7 +935,7 @@ public class Client {
             drawMap(graphics);
             drawPlayers(graphics);
             drawEnemies(graphics);
-            if(alive){
+            if(alive){ // If client is alive draw the ability UI
                 graphics.setColor(Const.LARGE_BUTTON_BORDER_COLOR);
                 graphics.fillRoundRect((int)Const.PLAYER_INFO_RECT.getX(), (int)Const.PLAYER_INFO_RECT.getY(), (int)Const.PLAYER_INFO_RECT.getWidth(), (int)Const.PLAYER_INFO_RECT.getHeight(), Const.RADIUS, Const.RADIUS);
                 int counter = 0;
@@ -1097,6 +1075,7 @@ public class Client {
                 player.downed = false;
                 player.alive = true;
             }
+            this.alive = true;
             this.enemies.clear();
         }
         public void clearGame(){
@@ -1138,12 +1117,6 @@ public class Client {
             public int getY(){
                 return this.y;
             }
-            public boolean alive(){
-                return this.alive;
-            }
-            public boolean downed(){
-                return this.downed;
-            }
             public void setDirection(int direction){
                 if(direction >= 0 && direction <= 3){this.direction = direction;} // Using if statement just in case
             }
@@ -1169,7 +1142,7 @@ public class Client {
                         Const.HALF_HEIGHT + (this.y - mainPlayerY) + Const.PLAYER_IMAGE_CORRECTIONS.get(direction)[1] - Const.PLAYER_DIMENSIONS/2);
                 }
                 this.name.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX), Const.HALF_HEIGHT + (this.y - mainPlayerY) - 20);
-                if(alive){
+                if(alive){ // Drawing health bar
                     graphics.setColor(Color.RED);
                     graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 25, Const.HALF_HEIGHT + 5 + (this.y - mainPlayerY), 50, 10);
                     graphics.setColor(Color.GREEN);
@@ -1205,6 +1178,7 @@ public class Client {
             }
             public void draw(Graphics graphics, int mainPlayerX, int mainPlayerY){
                 enemyImage.draw(graphics, Const.HALF_WIDTH + (this.x - mainPlayerX) - Const.PLAYER_DIMENSIONS/2, Const.HALF_HEIGHT + (this.y - mainPlayerY) - Const.PLAYER_DIMENSIONS/2);
+                // Health bar
                 graphics.setColor(Color.RED);
                 graphics.fillRect(Const.HALF_WIDTH + (this.x - mainPlayerX) - 20, Const.HALF_HEIGHT + 8 + (this.y - mainPlayerY), 50, 10);
                 graphics.setColor(Color.GREEN);
@@ -1229,8 +1203,7 @@ public class Client {
                     }else if(key == KeyEvent.VK_S){
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         writer.print(Const.MOVE + " 2");
-                    }
-                    else if(key == KeyEvent.VK_A){
+                    }else if(key == KeyEvent.VK_A){
                         Client.ServerWriter writer = new Client.ServerWriter(output);
                         writer.print(Const.MOVE + " 3");
                     }
@@ -1317,10 +1290,8 @@ public class Client {
                     swapper.swap();
                 }
             }
-            public void keyReleased(KeyEvent e){ 
-            }   
-            public void keyTyped(KeyEvent e){
-            }           
+            public void keyReleased(KeyEvent e){}   
+            public void keyTyped(KeyEvent e){}           
         }
     }
     public class GameOverPanel extends ScreenPanel {

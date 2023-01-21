@@ -18,7 +18,6 @@ public class Const{
     public static final Image GAME_TITLE = loadImage("extra_files/images/GameTitle.png");
 
     // Fonts
-    //private static final String TARRGET_FONT_FILE = "extra_files/fonts/TarrgetHalfToneItalic-ozyV.ttf";
     private static final String RAUBFONT_FONT_FILE = "extra_files/fonts/RaubFont.ttf";
 
     // Button values 
@@ -127,7 +126,7 @@ public class Const{
     public static final String UPDATE_MAP = "UPDATE_MAP"; // Updates a certian part of the map for the client
     public static final String DRAW_MAP = "DRAW_MAP"; // Tells the client to draw the map and lets them know the map will be updated shortly
     public static final String ABILITIES = "ABILITIES"; // Player has selected abilities
-    public static final String REMOVEP = "REMOVEP"; // Player has left lobby, remove them from the player list
+    public static final String REMOVE_PLAYER = "REMOVEP"; // Player has left lobby, remove them from the player list
     public static final String NEWE = "NEWE"; // New enemy has spawned 
     public static final String PLAYER = "PLAYER"; // Updates the correspondings players information for the client
     public static final String DOWNED = "DOWNED"; // Tells the client the specified player has been put into the downed state

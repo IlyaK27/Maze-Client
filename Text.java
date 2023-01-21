@@ -1,49 +1,49 @@
 /**
  * Final Game Text Class
  * @Author Ilya Kononov
- * @Date = June 20 2022
+ * @Date = January 22 2023
  * This class represents a text field that can then be drawn onto the screen 
  */
 
- import java.awt.*;
- import java.awt.Graphics;
- import java.awt.Font;
- import java.awt.Color;
- import java.awt.geom.AffineTransform;
- import java.awt.font.FontRenderContext;
+import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Font;
+import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.awt.font.FontRenderContext;
  
- public class Text{
-     private String text;
-     private Font font;
-     private Color color;
-     private int fontSize;
-     private int centerX;
-     private int x;
-     private int y;
-     private int width;
-     private int height;
-     public Text(String text, Font font, Color color, int centerX, int y) {
-         this.text = text;
-         this.font = font;
-         this.color = color;
-         this.fontSize = this.font.getSize();
-         this.centerX = centerX;
-         this.y = y;
-         this.width = this.getTextWidth(); 
-         this.x = (this.centerX - (this.width / 2));
-         this.height = this.getTextHeight(); 
-     }
- //-----------------------------------------------------------------------------
- // Getters and Setters
-     public int getWidth(){
-         return this.width;
-     }
-     public int getHeight(){
-         return this.height;
-     }
-     public String getText(){
-         return this.text;
-     }
+public class Text{
+    private String text;
+    private Font font;
+    private Color color;
+    private int fontSize;
+    private int centerX;
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+    public Text(String text, Font font, Color color, int centerX, int y) {
+        this.text = text;
+        this.font = font;
+        this.color = color;
+        this.fontSize = this.font.getSize();
+        this.centerX = centerX;
+        this.y = y;
+        this.width = this.getTextWidth(); 
+        this.x = (this.centerX - (this.width / 2));
+        this.height = this.getTextHeight(); 
+    }
+//-----------------------------------------------------------------------------
+// Getters and Setters
+    public int getWidth(){
+        return this.width;
+    }
+    public int getHeight(){
+        return this.height;
+    }
+    public String getText(){
+        return this.text;
+    }
     public void setX(int x){
         this.x = x;
     }

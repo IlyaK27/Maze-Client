@@ -1,7 +1,7 @@
 /**
  * Final Game Button Class
  * @Author Ilya Kononov
- * @Date = 
+ * @Date = January 22 2023
  * This class represents a buttons frame since it is abtstract. 
  * Its custom appearance gets shared with all other buttons in the game.
  * This class provides a template for all other Buttons

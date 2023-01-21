@@ -1,7 +1,7 @@
 /**
  * Final Game ServerButton Class
  * @Author Ilya Kononov
- * @Date = 
+ * @Date = January 22 2023
  * This class is a button that has text written ontop of it 
  * This type of button is sends a command to the server which the server will send something back to the client
  * After the server sent back the command after recieving this buttons command the client will switch screens
@@ -32,13 +32,9 @@ public class ServerButton extends TextButton {
                 writer.print(command);
             }
         }
-        public void mousePressed(MouseEvent e) {  
-        }
-        public void mouseReleased(MouseEvent e) { 
-        }
-        public void mouseEntered(MouseEvent e) {
-        }
-        public void mouseExited(MouseEvent e) {
-        }
+        public void mousePressed(MouseEvent e) {}
+        public void mouseReleased(MouseEvent e) {}
+        public void mouseEntered(MouseEvent e) {}
+        public void mouseExited(MouseEvent e) {}
     }
 }

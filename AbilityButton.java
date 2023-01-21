@@ -1,9 +1,9 @@
 /**
- * Final Game ImageButton Class
+ * Final Game AbilityButtton Class
  * @Author Ilya Kononov
- * @Date = 
- * This class is a button that has text written ontop of it 
- * This type of button is used to swtich screens without needing a server input
+ * @Date = January 22 2023
+ * This class is a button that has an image ontop of it 
+ * This type of button is used with abilities 
  */
 
  import java.awt.Graphics;
@@ -66,7 +66,7 @@
      */
     public void draw(Graphics graphics) {
         // Draw the button body.
-        if(mouseInside || stayHeld){
+        if(mouseInside || stayHeld){ // If the button is being hovered over or held draw a larger border to show the client some indication its selected/hovered
             this.extraDimensions = Const.ABILITY_BUTTON_BORDER;
         }else if (this.extraDimensions != 0){
             this.extraDimensions = 0;
