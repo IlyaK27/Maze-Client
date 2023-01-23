@@ -32,8 +32,9 @@ public class Const{
     public static final int SPACE_BETWEEN_LOBBIES = 125;
     public static final int SELECTED_ABILITY_CENTER_X = 100;
     public static final int ABILITY_BANK_X = 263;
-    public static final int ABILITY_BANK_Y = 312;
-    public static final int ULTIMATE_BANK_Y = 653;
+    public static final int PASSIVE_BANK_Y = 285;
+    public static final int ABILITY_BANK_Y = 480;
+    public static final int ULTIMATE_BANK_Y = 670;
     public static final int ABILITY_X_DIFFERENCE = 105;
     public static final int ABILITY_Y_DIFFERENCE = 105;
     public static final int GO_BACK_X = 100;
@@ -59,8 +60,9 @@ public class Const{
 
     // Ability Select
     public static final Rectangle SELECTED_ABILITES_BOX =  new Rectangle(0, 270, 200, 850);
-    public static final Rectangle ABILITY_BANK_BOX =  new Rectangle(200, 270, 650, 360);
-    public static final Rectangle ULTIMATE_BANK_BOX =  new Rectangle(200, 640, 650, 210);
+    public static final Rectangle PASSIVE_BANK_BOX =  new Rectangle(200, 270, 650, 193);
+    public static final Rectangle ABILITY_BANK_BOX =  new Rectangle(200, (int)(PASSIVE_BANK_BOX.getY() + PASSIVE_BANK_BOX.getHeight()), 650, (int)PASSIVE_BANK_BOX.getHeight());
+    public static final Rectangle ULTIMATE_BANK_BOX =  new Rectangle(200, (int)(ABILITY_BANK_BOX.getY() + ABILITY_BANK_BOX.getHeight()), 650, (int)PASSIVE_BANK_BOX.getHeight());
     
     // Game screen
     public static final int ABILITY_1_X = Const.HALF_WIDTH - 75;
@@ -106,8 +108,8 @@ public class Const{
     public static final String UNREADY = "UNREADY"; // Player is not ready. Automatically happens when player goes to reselect abilities
     public static final String MOVE = "MOVE"; // Client gives lobby what direction they just went
     public static final String ATTACK = "ATTACK"; // Client used normal attack 
-    public static final String ABILITY1 = "ABILITY1"; // Client used first ability  
-    public static final String ABILITY2 = "ABILITY2"; // Client used second ability
+    public static final String PASSIVE = "PASSIVE"; // Not actually a command but didn't make sense to put somewhere else
+    public static final String ABILITY = "ABILITY"; // Client used ability  
     public static final String ULTIMATE = "ULTIMATE"; // Client used ultimate ability
     public static final String DRAWN = "DRAWN"; // Client has drawn their map so send new map update
     public static final String SPECTATE = "SPECTATE"; // Client tells server the want to spectate the provided player
@@ -137,27 +139,45 @@ public class Const{
     public static final String DIE = "DIE"; // Client has died
     public static final String WIN = "WIN"; // Player(s) have won this round send them to the mid round screen
     public static final String LOSE = "LOSE"; // Player(s) have lost the game send them to the game over screen
-    public static final String ABILITY1_READY = "ABILITY1"; // Tells client their first ability is off cooldown
-    public static final String ABILITY2_READY = "ABILITY2"; // Tells client their second ability is off cooldown
-    public static final String ULTIMATE_READY = "ULTIMATE"; // Tells client their ultimate ability is off cooldown
+    public static final String ABILITY_READY = "ABILITY_READY"; // Tells client their ability is off cooldown
+    public static final String ULTIMATE_READY = "ULTIMATE_READY"; // Tells client their ultimate ability is off cooldown
 
     // Images
     public static final Image MENU_BACKGROUND = loadImage("extra_files/images/MenuBackground.png");
     public static final Image WALL_BACKGROUND = loadImage("extra_files/images/WallBackground.png");
     public static final Image ABILITY_SELECT_BACKGROUND = loadImage("extra_files/images/AbilitySelectBackground.png");
+    public static final Image CONTROLS_BACKGROUND = loadImage("extra_files/images/ControlsBackground.png");
     public static final Image BLANK_BACKGROUND = loadImage("extra_files/images/BlankBackground.png");
 
     // Ability images
     public static final Image BLANK_ABILITY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/BlankAbility.png");
+
+    private static final Image SHARPENED_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Sharpened.png");
+    private static final Image LIFE_STEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/LifeSteal.png");
+    private static final Image MAX_HEALTH_IMAGE = loadImage("extra_files/images/abilities/ability_icons/MaxHealth.png");
+    private static final Image HEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Heal.png");
+    private static final Image HEALTH_REGEN_IMAGE = loadImage("extra_files/images/abilities/ability_icons/HealthRegen.png");
+    private static final Image CLOAKED_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Cloaked.png");
+    private static final Image SWIFT_MOVES_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SwiftMoves.png");
+    private static final Image SAVAGE_BLOW_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SavageBlow.png");
+    private static final Image INVESTIGATE_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Investigate.png");
     private static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/TimeStop.png");
-    //public static final Image TIME_STOP_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
-    private static final Image SELF_HEAL_IMAGE = loadImage("extra_files/images/abilities/ability_icons/SelfHeal.png");
-    private static final Image INVISIBILTY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Invisibility.png");
+    private static final Image FLAMING_RAGE_IMAGE = loadImage("extra_files/images/abilities/ability_icons/FlamingRage.png");
+    private static final Image FORTIFY_IMAGE = loadImage("extra_files/images/abilities/ability_icons/Fortify.png");
 
     // Ability descriptions
+    private static final Image SHARPENED_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SharpenedDescription.png");
+    private static final Image LIFE_STEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/LifeStealDescription.png");
+    private static final Image MAX_HEALTH_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/MaxHealthDescription.png");
+    private static final Image HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/HealDescription.png");
+    private static final Image HEALTH_REGEN_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/HealthRegenDescription.png");
+    private static final Image CLOAKED_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/CloakedDescription.png");
+    private static final Image SWIFT_MOVES_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SwiftMovesDescription.png");
+    private static final Image SAVAGE_BLOW_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SavageBlowDescription.png");
+    private static final Image INVESTIGATE_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvestigateDescription.png");
     private static final Image TIME_STOP_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/TimeStopDescription.png");
-    //private static final Image SELF_HEAL_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/SelfHealDescription.png");
-    //private static final Image INVISIBILTY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/InvisbilityDescription.png");
+    private static final Image FLAMING_RAGE_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/FlamingRageDescription.png");
+    private static final Image FORTIFY_DESCRIPTION = loadImage("extra_files/images/abilities/ability_descriptions/FortifyDescription.png");
 
     public static final Image ENEMY_IMAGE = loadImage("extra_files/images/Enemy.png");
     // Player images, Icons are for lobby and images are for actual in game and have different directions, they are also a bit larger too.
@@ -215,36 +235,63 @@ public class Const{
         {
             put('W', loadImage("extra_files/images/tile_images/WallImage.png"));
             put('P', loadImage("extra_files/images/tile_images/PathImage.png"));
+            put('O', loadImage("extra_files/images/tile_images/OptimalImage.png"));
             put('S', loadImage("extra_files/images/tile_images/StartImage.png"));
             put('E', loadImage("extra_files/images/tile_images/EndImage.png"));
-            //put('O', loadImage("extra_files/images/player_icons/OrangeIcon.png"));
         }
     };
 
     // Ability hashmaps
+    public static final HashMap<String, Image> PASSIVE_IMAGES = new HashMap<String, Image>(){ // Name, Image
+        {
+            put("SHARPENED", SHARPENED_IMAGE);
+            put("MAX_HEALTH", MAX_HEALTH_IMAGE);
+            put("HEALTH_REGEN", HEALTH_REGEN_IMAGE);
+            put("CLOAKED", CLOAKED_IMAGE);
+            put("LIFE_STEAL", LIFE_STEAL_IMAGE);
+        }
+    };
+
+    public static final HashMap<String, Image> PASSIVE_DESCRIPTIONS = new HashMap<String, Image>(){ // Name, Description
+        {
+            put("SHARPENED", SHARPENED_DESCRIPTION);
+            put("MAX_HEALTH", MAX_HEALTH_DESCRIPTION);
+            put("HEALTH_REGEN", HEALTH_REGEN_DESCRIPTION);
+            put("CLOAKED", CLOAKED_DESCRIPTION);
+            put("LIFE_STEAL", LIFE_STEAL_DESCRIPTION);
+        }
+    };
     public static final HashMap<String, Image> ABILITY_IMAGES = new HashMap<String, Image>(){ // Name, Image
         {
-            put("SELF_HEAL", SELF_HEAL_IMAGE);
-            put("INVISBILITY", INVISIBILTY_IMAGE);
+            put("HEAL", HEAL_IMAGE);
+            put("SAVAGE_BLOW", SAVAGE_BLOW_IMAGE);
+            put("INVESTIGATE", INVESTIGATE_IMAGE);
+            put("SWIFT_MOVES", SWIFT_MOVES_IMAGE);
         }
     };
 
     public static final HashMap<String, Image> ABILITY_DESCRIPTIONS = new HashMap<String, Image>(){ // Name, Description
         {
-            put("SELF_HEAL", TIME_STOP_DESCRIPTION);
-            put("INVISBILITY", TIME_STOP_DESCRIPTION);
+            put("HEAL", HEAL_DESCRIPTION);
+            put("SAVAGE_BLOW", SAVAGE_BLOW_DESCRIPTION);
+            put("INVESTIGATE", INVESTIGATE_DESCRIPTION);
+            put("SWIFT_MOVES", SWIFT_MOVES_DESCRIPTION);
         }
     };
 
     public static final HashMap<String, Image> ULTIMATE_IMAGES = new HashMap<String, Image>(){ // Name, Image
         {
             put("TIME_STOP", TIME_STOP_IMAGE);
+            put("FLAMING_RAGE", FLAMING_RAGE_IMAGE);
+            put("FORTIFY", FORTIFY_IMAGE);
         }
     };
 
     public static final HashMap<String, Image> ULTIMATE_DESCRIPTIONS = new HashMap<String, Image>(){ // Name, Description
         {
             put("TIME_STOP", TIME_STOP_DESCRIPTION);
+            put("FLAMING_RAGE", FLAMING_RAGE_DESCRIPTION);
+            put("FORTIFY", FORTIFY_DESCRIPTION);
         }
     };
 
