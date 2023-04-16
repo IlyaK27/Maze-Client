@@ -169,7 +169,7 @@ public class Client {
                         if(!(lost)){ 
                             Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, MENU_PANEL); // After player leaves lobby they can swap to main menu right away since the lobbyName will always be correct
                             swapper.swap();
-                        }else{ // Once the game ends all players get sent this command however they don't need to swap screens just yet
+                        }else{ // Once the game ends all players get sent this command however they don't need to swap screenskey just yet
                             lost = false;
                         }
                     }
@@ -194,9 +194,9 @@ public class Client {
                         String ability = updateInfo[3];
                         String ultimate = updateInfo[4];
                         lobbyScreen.updatePlayerBanner(playerName, passive, ability, ultimate);
-                        gameScreen.setAbilities(passive, ability, ultimate);
                         if(updateInfo.length > 5 && updateInfo[5].equals("ME")){ // This is done so that the player cant swap screens until they have chosen all of their abilities
                             lobbyScreen.updateLobbyTitle();
+                            gameScreen.setAbilities(passive, ability, ultimate);
                             Client.ScreenSwapper swapper = new Client.ScreenSwapper(cards, LOBBY_PANEL);
                             swapper.swap();
                         }
@@ -919,6 +919,7 @@ public class Client {
         private ArrayList<Enemy> enemies;
         private char[][] currentFov;
         private char[][] newFov;
+        private String myName;
         private Player currentPlayer; // Player that is currently being spectated
         private int mapX; // X coordinate of top left tile of map that is being drawn on screen
         private int mapY; // Y coordinate of top left tile of map that is being drawn on screen
@@ -971,6 +972,7 @@ public class Client {
             this.abilitiesReady.replace(ultimate, !ultimateState, ultimateState);
         }
         public void setCurrentPlayer(String playerName){
+            this.myName = playerName;
             for(Player player: players){
                 if(playerName.equals(player.name())){
                     currentPlayer = player;
@@ -1092,6 +1094,10 @@ public class Client {
                 player.setHealth(100);
                 player.downed = false;
                 player.alive = true;
+                if(myName.equals(player.name())){ // Making sure Player point of view is back on the proper player
+                    currentPlayer = player;
+                    break;
+                }
             }
             abilitiesReady.replace(ability, true);
             abilitiesReady.replace(ultimate, true);

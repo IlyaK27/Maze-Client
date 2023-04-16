@@ -52,7 +52,6 @@ public class Text{
         this.x = centerX - this.width/2;
     }
     public void setText(String newText){
-        System.out.println("Text-" + newText);
         this.text = newText;
         this.width = this.getTextWidth(); 
         this.x = (this.centerX - (this.width / 2));
